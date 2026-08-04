@@ -7,4 +7,243 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Models added in Phase 2: Database design & Prisma schema.
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  ORGANIZER
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+  CANCELLED
+}
+
+enum FieldType {
+  TEXT
+  LONG_TEXT
+  EMAIL
+  PHONE
+  NUMBER
+  DATE
+  DROPDOWN
+  RADIO
+  CHECKBOX
+  TOGGLE
+  FILE
+}
+
+enum CheckInMethod {
+  QR_SCAN
+  MANUAL
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ORGANIZER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events        Event[]
+  refreshTokens RefreshToken[]
+  checkIns      CheckIn[]
+  auditLogs     AuditLog[]
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+
+model Event {
+  id                   String      @id @default(cuid())
+  name                 String
+  description          String?
+  venue                String?
+  eventDate            DateTime
+  startTime            DateTime
+  endTime              DateTime
+  registrationDeadline DateTime?
+  organizerName        String?
+  logoUrl              String?
+  bannerUrl            String?
+  status               EventStatus @default(DRAFT)
+
+  // Cached at creation time so we don't regenerate on every request.
+  registrationUrl String?
+  qrCodeImageUrl  String?
+
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy        User              @relation(fields: [createdById], references: [id])
+  registrationForm RegistrationForm?
+  attendees        Attendee[]
+  auditLogs        AuditLog[]
+
+  @@index([createdById])
+}
+
+// ============================================================
+// DYNAMIC REGISTRATION FORM
+// ============================================================
+
+model RegistrationForm {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  event  Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  fields FormField[]
+}
+
+model FormField {
+  id             String    @id @default(cuid())
+  formId         String
+  fieldKey       String // stable key, e.g. "full_name" or "custom_department"
+  label          String
+  fieldType      FieldType
+  isDefaultField Boolean   @default(false)
+  isVisible      Boolean   @default(true)
+  isRequired     Boolean   @default(false)
+  placeholder    String?
+  helpText       String?
+  displayOrder   Int       @default(0)
+
+  // Conditional logic: show this field only if `conditionField` equals `conditionValue`.
+  conditionFieldId String?
+  conditionValue    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  form            RegistrationForm   @relation(fields: [formId], references: [id], onDelete: Cascade)
+  conditionField  FormField?         @relation("FieldCondition", fields: [conditionFieldId], references: [id])
+  dependentFields FormField[]        @relation("FieldCondition")
+  options         FieldOption[]
+  responses       AttendeeResponse[]
+
+  @@unique([formId, fieldKey])
+  @@index([formId])
+}
+
+model FieldOption {
+  id           String @id @default(cuid())
+  fieldId      String
+  label        String
+  value        String
+  displayOrder Int    @default(0)
+
+  field FormField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@index([fieldId])
+}
+
+// ============================================================
+// ATTENDEES
+// ============================================================
+
+model Attendee {
+  id                 String @id @default(cuid())
+  eventId            String
+  registrationNumber String @unique
+
+  // Default fields - real columns for fast search/filter/export.
+  fullName     String
+  phone        String?
+  email        String?
+  organization String?
+  position     String?
+  gender       String?
+  country      String?
+  city         String?
+
+  checkedIn     Boolean        @default(false)
+  checkInTime   DateTime?
+  checkInMethod CheckInMethod?
+
+  registeredAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event     Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  responses AttendeeResponse[]
+  checkIns  CheckIn[]
+
+  @@unique([eventId, email])
+  @@index([eventId])
+  @@index([fullName])
+}
+
+model AttendeeResponse {
+  id         String   @id @default(cuid())
+  attendeeId String
+  fieldId    String
+  value      String // JSON-encoded for checkbox/multi-select answers
+  createdAt  DateTime @default(now())
+
+  attendee Attendee  @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+  field    FormField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@unique([attendeeId, fieldId])
+  @@index([attendeeId])
+}
+
+// ============================================================
+// CHECK-IN
+// ============================================================
+
+model CheckIn {
+  id            String        @id @default(cuid())
+  attendeeId    String        @unique // DB-level guarantee: one check-in per attendee
+  checkedInById String?
+  method        CheckInMethod
+  checkedInAt   DateTime      @default(now())
+
+  attendee    Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+  checkedInBy User?    @relation(fields: [checkedInById], references: [id])
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  eventId    String?
+  action     String // e.g. "EVENT_CREATED", "ATTENDEE_DELETED"
+  entityType String // e.g. "Event", "Attendee", "FormField"
+  entityId   String
+  changes    Json?
+  createdAt  DateTime @default(now())
+
+  user  User?  @relation(fields: [userId], references: [id])
+  event Event? @relation(fields: [eventId], references: [id])
+
+  @@index([entityType, entityId])
+}
