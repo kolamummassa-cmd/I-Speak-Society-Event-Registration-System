@@ -1,0 +1,23 @@
+{
+  "name": "i-speak-society-event-registration-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Digital QR-code-based event registration and check-in system for I Speak Society.",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "db:generate": "pnpm --filter @isociety/database run generate",
+    "db:migrate": "pnpm --filter @isociety/database run migrate:dev",
+    "db:studio": "pnpm --filter @isociety/database run studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

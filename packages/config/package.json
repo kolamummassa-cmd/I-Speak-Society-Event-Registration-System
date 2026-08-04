@@ -1,0 +1,7 @@
+{
+  "name": "@isociety/config",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared TypeScript compiler configuration for all apps and packages.",
+  "files": ["tsconfig.base.json"]
+}
