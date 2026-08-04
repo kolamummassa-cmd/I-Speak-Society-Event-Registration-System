@@ -5,6 +5,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { authRouter } from "./modules/auth/auth.routes";
 
 export function createApp() {
   const app = express();
@@ -24,8 +25,9 @@ export function createApp() {
     res.status(200).json({ success: true, message: "OK", timestamp: new Date().toISOString() });
   });
 
-  // Feature routes are mounted here as each module is built:
-  // app.use("/api/auth", authRouter);
+  app.use("/api/auth", authRouter);
+
+  // Further feature routes are mounted here as each module is built:
   // app.use("/api/events", eventsRouter);
   // ...
 

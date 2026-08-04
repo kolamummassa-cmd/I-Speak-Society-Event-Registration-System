@@ -11,7 +11,8 @@
     "typecheck": "pnpm -r run typecheck",
     "db:generate": "pnpm --filter @isociety/database run generate",
     "db:migrate": "pnpm --filter @isociety/database run migrate:dev",
-    "db:studio": "pnpm --filter @isociety/database run studio"
+    "db:studio": "pnpm --filter @isociety/database run studio",
+    "db:seed": "pnpm --filter @isociety/database run seed"
   },
   "devDependencies": {
     "typescript": "^5.7.0"
