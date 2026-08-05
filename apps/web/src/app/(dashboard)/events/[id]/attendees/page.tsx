@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import type { AttendeeSummary, Paginated } from "@isociety/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, formatApiError } from "@/lib/api-client";
 import { formatDate, formatTime } from "@/lib/format";
 
 const PAGE_SIZE = 20;
@@ -26,6 +26,7 @@ export default function AttendeesPage() {
   const [search, setSearch] = useState("");
   const [checkedIn, setCheckedIn] = useState<CheckInFilter>("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState<"xlsx" | "pdf" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function load(pageToLoad: number, searchValue: string, checkedInValue: CheckInFilter) {
@@ -60,6 +61,30 @@ export default function AttendeesPage() {
     load(page, search, checkedIn);
   }
 
+  async function handleExport(format: "xlsx" | "pdf") {
+    setIsExporting(format);
+    setError(null);
+    try {
+      const q = new URLSearchParams();
+      if (search) q.set("search", search);
+      if (checkedIn !== "all") q.set("checkedIn", checkedIn);
+      const query = q.toString();
+      const { blob, filename } = await apiClient.download(
+        `/events/${params.id}/reports/attendees.${format}${query ? `?${query}` : ""}`
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename ?? `attendees.${format}`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(formatApiError(err));
+    } finally {
+      setIsExporting(null);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -67,9 +92,27 @@ export default function AttendeesPage() {
           <h1 className="text-2xl font-semibold">Attendees</h1>
           <p className="text-sm text-muted-foreground">{total} registered</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href={`/events/${params.id}`}>Back to event</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            disabled={isExporting !== null}
+            onClick={() => handleExport("pdf")}
+          >
+            <Download className="h-4 w-4" />
+            {isExporting === "pdf" ? "Preparing..." : "Attendee Report (PDF)"}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={isExporting !== null}
+            onClick={() => handleExport("xlsx")}
+          >
+            <Download className="h-4 w-4" />
+            {isExporting === "xlsx" ? "Exporting..." : "Export to Excel"}
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/events/${params.id}`}>Back to event</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

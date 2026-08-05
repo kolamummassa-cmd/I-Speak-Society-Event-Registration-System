@@ -109,6 +109,33 @@ async function upload<T>(path: string, formData: FormData, skipAuthRetry = false
   return body as T;
 }
 
+// For binary responses (Excel export, etc.) where we want the raw Blob and
+// the server-suggested filename from Content-Disposition, not parsed JSON.
+async function download(
+  path: string,
+  skipAuthRetry = false
+): Promise<{ blob: Blob; filename: string | null }> {
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    credentials: "include",
+  });
+
+  if (res.status === 401 && !skipAuthRetry) {
+    const refreshed = await tryRefresh();
+    if (refreshed) return download(path, true);
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(res.status, body?.message ?? "Download failed", body?.details);
+  }
+
+  const disposition = res.headers.get("Content-Disposition");
+  const filename = disposition?.match(/filename="([^"]+)"/)?.[1] ?? null;
+  const blob = await res.blob();
+  return { blob, filename };
+}
+
 export const apiClient = {
   get: <T>(path: string) => request<T>(path, { method: "GET" }),
   post: <T>(path: string, data?: unknown) =>
@@ -117,4 +144,5 @@ export const apiClient = {
     request<T>(path, { method: "PATCH", body: data ? JSON.stringify(data) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
   upload: <T>(path: string, formData: FormData) => upload<T>(path, formData),
+  download: (path: string) => download(path),
 };

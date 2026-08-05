@@ -5,6 +5,7 @@ import type { PublicEventInfo, RegisterAttendeeInput } from "@isociety/shared";
 import { AppError } from "../../middleware/errorHandler";
 import { recordAuditLog } from "../../utils/audit";
 import { generateRegistrationNumber } from "../../utils/registrationNumber";
+import { DEFAULT_FIELD_COLUMNS } from "../../utils/defaultFieldColumns";
 import { env } from "../../config/env";
 
 const formInclude = {
@@ -12,20 +13,6 @@ const formInclude = {
     orderBy: { displayOrder: "asc" as const },
     include: { options: { orderBy: { displayOrder: "asc" as const } } },
   },
-};
-
-// Default fields map 1:1 to real Attendee columns (a deliberate schema
-// choice from Phase 2, for fast search/filter/export) rather than living in
-// AttendeeResponse like custom fields do.
-const DEFAULT_FIELD_COLUMNS: Record<string, string> = {
-  full_name: "fullName",
-  phone: "phone",
-  email: "email",
-  organization: "organization",
-  position: "position",
-  gender: "gender",
-  country: "country",
-  city: "city",
 };
 
 function toPublicEvent(event: {

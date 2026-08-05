@@ -14,6 +14,7 @@ import {
 import { formRouter } from "../forms/form.routes";
 import { attendeeRouter } from "../attendees/attendee.routes";
 import { checkinRouter } from "../checkin/checkin.routes";
+import { reportRouter } from "../reports/report.routes";
 
 export const eventRouter = Router();
 
@@ -31,3 +32,4 @@ eventRouter.post("/:id/qrcode", asyncHandler(regenerateQrCodeHandler));
 eventRouter.use("/:id/form", formRouter);
 eventRouter.use("/:id/attendees", attendeeRouter);
 eventRouter.use("/:id/checkin", checkinRouter);
+eventRouter.use("/:id/reports", reportRouter);

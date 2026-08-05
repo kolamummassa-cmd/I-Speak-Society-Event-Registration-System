@@ -1,14 +1,17 @@
 import { Prisma, prisma } from "@isociety/database";
 
-export interface ListAttendeesFilters {
-  page: number;
-  pageSize: number;
+export interface AttendeeFilters {
   search?: string;
   checkedIn?: boolean;
 }
 
-export async function findMany(eventId: string, filters: ListAttendeesFilters) {
-  const where: Prisma.AttendeeWhereInput = {
+export interface ListAttendeesFilters extends AttendeeFilters {
+  page: number;
+  pageSize: number;
+}
+
+function buildWhere(eventId: string, filters: AttendeeFilters): Prisma.AttendeeWhereInput {
+  return {
     eventId,
     ...(filters.checkedIn !== undefined ? { checkedIn: filters.checkedIn } : {}),
     ...(filters.search
@@ -22,6 +25,10 @@ export async function findMany(eventId: string, filters: ListAttendeesFilters) {
         }
       : {}),
   };
+}
+
+export async function findMany(eventId: string, filters: ListAttendeesFilters) {
+  const where = buildWhere(eventId, filters);
 
   const [attendees, total] = await prisma.$transaction([
     prisma.attendee.findMany({
@@ -43,6 +50,18 @@ export function findById(eventId: string, attendeeId: string) {
       responses: {
         include: { field: { select: { label: true, fieldType: true } } },
       },
+    },
+  });
+}
+
+// Unpaginated - used for Excel export, which needs every matching row in
+// one pass rather than a page at a time.
+export function findAllForExport(eventId: string, filters: AttendeeFilters) {
+  return prisma.attendee.findMany({
+    where: buildWhere(eventId, filters),
+    orderBy: { registeredAt: "asc" },
+    include: {
+      responses: { select: { fieldId: true, value: true } },
     },
   });
 }
