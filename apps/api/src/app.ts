@@ -8,6 +8,7 @@ import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { apiLimiter } from "./middleware/rateLimiter";
 import { authRouter } from "./modules/auth/auth.routes";
+import { dashboardRouter } from "./modules/dashboard/dashboard.routes";
 import { eventRouter } from "./modules/events/event.routes";
 import { uploadRouter } from "./modules/uploads/upload.routes";
 import { publicRouter } from "./modules/public/public.routes";
@@ -43,6 +44,7 @@ export function createApp() {
   app.use("/api", apiLimiter);
 
   app.use("/api/auth", authRouter);
+  app.use("/api/dashboard", dashboardRouter);
   app.use("/api/events", eventRouter);
   app.use("/api/uploads", uploadRouter);
   app.use("/api/public", publicRouter);
