@@ -78,12 +78,15 @@ export default function EventDetailPage() {
             {event.venue ? ` - ${event.venue}` : ""}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
             <Link href={`/events/${event.id}/checkin`}>Check-in</Link>
           </Button>
           <Button asChild variant="outline">
             <Link href={`/events/${event.id}/attendees`}>View attendees</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/events/${event.id}/analytics`}>Analytics</Link>
           </Button>
           <Button asChild variant="outline">
             <Link href={`/events/${event.id}/form`}>Registration form</Link>
