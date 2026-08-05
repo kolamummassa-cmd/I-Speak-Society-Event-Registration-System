@@ -11,6 +11,7 @@ import {
   regenerateQrCodeHandler,
   updateEventHandler,
 } from "./event.controller";
+import { formRouter } from "../forms/form.routes";
 
 export const eventRouter = Router();
 
@@ -25,3 +26,4 @@ eventRouter.post("/", validateBody(createEventSchema), asyncHandler(createEventH
 eventRouter.patch("/:id", validateBody(updateEventSchema), asyncHandler(updateEventHandler));
 eventRouter.delete("/:id", asyncHandler(deleteEventHandler));
 eventRouter.post("/:id/qrcode", asyncHandler(regenerateQrCodeHandler));
+eventRouter.use("/:id/form", formRouter);

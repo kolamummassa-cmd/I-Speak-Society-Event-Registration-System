@@ -1,4 +1,5 @@
 import { type EventStatus, Prisma, prisma } from "@isociety/database";
+import { DEFAULT_FIELDS } from "@isociety/shared";
 
 export interface ListEventsFilters {
   page: number;
@@ -39,9 +40,37 @@ export function findById(id: string) {
   });
 }
 
+// Creates the event and its registration form (pre-populated with the 8
+// default fields) in a single atomic write - a form always exists the
+// moment an event does, rather than being a separate best-effort step.
 export function create(data: Prisma.EventCreateInput) {
   return prisma.event.create({
-    data,
+    data: {
+      ...data,
+      registrationForm: {
+        create: {
+          fields: {
+            create: DEFAULT_FIELDS.map((field) => ({
+              fieldKey: field.fieldKey,
+              label: field.label,
+              fieldType: field.fieldType,
+              isDefaultField: true,
+              isRequired: field.isRequired,
+              displayOrder: field.displayOrder,
+              options: field.options
+                ? {
+                    create: field.options.map((opt, i) => ({
+                      label: opt.label,
+                      value: opt.value,
+                      displayOrder: i,
+                    })),
+                  }
+                : undefined,
+            })),
+          },
+        },
+      },
+    },
     include: { _count: { select: { attendees: true } } },
   });
 }
