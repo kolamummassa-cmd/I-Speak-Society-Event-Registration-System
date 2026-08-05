@@ -19,6 +19,23 @@ export class ApiError extends Error {
   }
 }
 
+// The validateBody/validateQuery middleware sends `details` as zod's
+// flattened field errors: { fieldName: ["message", ...] }. Turns that into
+// something readable instead of a generic "Validation failed".
+export function formatApiError(err: unknown): string {
+  if (err instanceof ApiError) {
+    const details = err.details as Record<string, string[] | undefined> | undefined;
+    if (details && typeof details === "object") {
+      const messages = Object.entries(details)
+        .filter(([, msgs]) => msgs && msgs.length > 0)
+        .map(([field, msgs]) => `${field}: ${msgs!.join(", ")}`);
+      if (messages.length > 0) return messages.join(" | ");
+    }
+    return err.message;
+  }
+  return err instanceof Error ? err.message : "Something went wrong.";
+}
+
 interface RequestOptions extends RequestInit {
   skipAuthRetry?: boolean;
 }
@@ -67,6 +84,31 @@ async function tryRefresh(): Promise<boolean> {
   }
 }
 
+// Separate from `request()` because file uploads need a multipart body -
+// the browser sets its own Content-Type (with the multipart boundary), so
+// we must NOT force "application/json" the way the JSON helpers do.
+async function upload<T>(path: string, formData: FormData, skipAuthRetry = false): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    body: formData,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    credentials: "include",
+  });
+
+  if (res.status === 401 && !skipAuthRetry) {
+    const refreshed = await tryRefresh();
+    if (refreshed) return upload<T>(path, formData, true);
+  }
+
+  const body = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new ApiError(res.status, body?.message ?? "Upload failed", body?.details);
+  }
+
+  return body as T;
+}
+
 export const apiClient = {
   get: <T>(path: string) => request<T>(path, { method: "GET" }),
   post: <T>(path: string, data?: unknown) =>
@@ -74,4 +116,5 @@ export const apiClient = {
   patch: <T>(path: string, data?: unknown) =>
     request<T>(path, { method: "PATCH", body: data ? JSON.stringify(data) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  upload: <T>(path: string, formData: FormData) => upload<T>(path, formData),
 };

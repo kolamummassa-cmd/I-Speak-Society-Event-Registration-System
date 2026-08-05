@@ -1,10 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { CalendarDays, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
+
+const navItems = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/events", label: "Events", icon: CalendarDays },
+];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -34,9 +40,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-muted">
       <header className="flex items-center justify-between border-b border-border bg-background px-6 py-4">
-        <div>
-          <p className="text-sm font-semibold">I Speak Society</p>
-          <p className="text-xs text-muted-foreground">Event Registration System</p>
+        <div className="flex items-center gap-8">
+          <div>
+            <p className="text-sm font-semibold">I Speak Society</p>
+            <p className="text-xs text-muted-foreground">Event Registration System</p>
+          </div>
+          <nav className="flex items-center gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">{user.name}</span>

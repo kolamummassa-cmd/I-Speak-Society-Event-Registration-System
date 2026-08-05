@@ -1,12 +1,17 @@
 import crypto from "node:crypto";
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import type { AccessTokenPayload } from "@isociety/shared";
 import { env } from "../config/env";
 
 export function signAccessToken(payload: AccessTokenPayload): string {
-  return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRES_IN,
-  });
+  // @types/jsonwebtoken narrows `expiresIn` to a branded "StringValue" type
+  // (e.g. "15m") rather than plain `string`, so our zod-validated env string
+  // needs an explicit cast here - the runtime value is already validated to
+  // be a duration string by the env schema.
+  const options: SignOptions = {
+    expiresIn: env.JWT_ACCESS_EXPIRES_IN as SignOptions["expiresIn"],
+  };
+  return jwt.sign(payload, env.JWT_ACCESS_SECRET, options);
 }
 
 export function verifyAccessToken(token: string): AccessTokenPayload {

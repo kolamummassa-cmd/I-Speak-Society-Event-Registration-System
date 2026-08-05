@@ -88,7 +88,9 @@ model Event {
   registrationDeadline DateTime?
   organizerName        String?
   logoUrl              String?
+  logoPublicId         String? // Cloudinary public_id, needed to delete the file later
   bannerUrl            String?
+  bannerPublicId       String?
   status               EventStatus @default(DRAFT)
 
   // Cached at creation time so we don't regenerate on every request.

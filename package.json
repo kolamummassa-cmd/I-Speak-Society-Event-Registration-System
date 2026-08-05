@@ -4,6 +4,7 @@
   "private": true,
   "description": "Digital QR-code-based event registration and check-in system for I Speak Society.",
   "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"pnpm dev:api\" \"pnpm dev:web\"",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
     "build": "pnpm -r run build",
@@ -15,6 +16,7 @@
     "db:seed": "pnpm --filter @isociety/database run seed"
   },
   "devDependencies": {
+    "concurrently": "^9.1.0",
     "typescript": "^5.7.0"
   },
   "packageManager": "pnpm@11.20.0",

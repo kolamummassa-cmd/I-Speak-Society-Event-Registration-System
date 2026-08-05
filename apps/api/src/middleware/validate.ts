@@ -14,3 +14,18 @@ export function validateBody(schema: ZodSchema) {
     next();
   };
 }
+
+// Same idea for query strings (e.g. pagination, search, status filters) -
+// coerces types (page: "2" -> 2) and rejects anything that doesn't match.
+export function validateQuery(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) {
+      return next(new AppError(400, "Invalid query parameters", result.error.flatten().fieldErrors));
+    }
+    // Express types req.query as ParsedQs (all strings); we're intentionally
+    // replacing it with the coerced, typed result from the schema.
+    req.query = result.data as unknown as Request["query"];
+    next();
+  };
+}

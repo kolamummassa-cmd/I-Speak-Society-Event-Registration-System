@@ -6,6 +6,8 @@ import morgan from "morgan";
 import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { authRouter } from "./modules/auth/auth.routes";
+import { eventRouter } from "./modules/events/event.routes";
+import { uploadRouter } from "./modules/uploads/upload.routes";
 
 export function createApp() {
   const app = express();
@@ -26,9 +28,11 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRouter);
+  app.use("/api/events", eventRouter);
+  app.use("/api/uploads", uploadRouter);
 
   // Further feature routes are mounted here as each module is built:
-  // app.use("/api/events", eventsRouter);
+  // app.use("/api/attendees", attendeeRouter);
   // ...
 
   app.use(notFoundHandler);
