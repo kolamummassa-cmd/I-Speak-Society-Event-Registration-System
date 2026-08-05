@@ -13,6 +13,7 @@ import {
 } from "./event.controller";
 import { formRouter } from "../forms/form.routes";
 import { attendeeRouter } from "../attendees/attendee.routes";
+import { checkinRouter } from "../checkin/checkin.routes";
 
 export const eventRouter = Router();
 
@@ -29,3 +30,4 @@ eventRouter.delete("/:id", asyncHandler(deleteEventHandler));
 eventRouter.post("/:id/qrcode", asyncHandler(regenerateQrCodeHandler));
 eventRouter.use("/:id/form", formRouter);
 eventRouter.use("/:id/attendees", attendeeRouter);
+eventRouter.use("/:id/checkin", checkinRouter);

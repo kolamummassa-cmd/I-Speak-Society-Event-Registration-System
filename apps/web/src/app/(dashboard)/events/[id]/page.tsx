@@ -80,6 +80,9 @@ export default function EventDetailPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
+            <Link href={`/events/${event.id}/checkin`}>Check-in</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href={`/events/${event.id}/attendees`}>View attendees</Link>
           </Button>
           <Button asChild variant="outline">

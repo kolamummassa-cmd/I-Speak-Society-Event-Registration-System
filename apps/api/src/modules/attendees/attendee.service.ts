@@ -4,7 +4,7 @@ import { AppError } from "../../middleware/errorHandler";
 import { recordAuditLog } from "../../utils/audit";
 import * as attendeeRepository from "./attendee.repository";
 
-function toSummary(attendee: {
+export function toSummary(attendee: {
   id: string;
   eventId: string;
   registrationNumber: string;
