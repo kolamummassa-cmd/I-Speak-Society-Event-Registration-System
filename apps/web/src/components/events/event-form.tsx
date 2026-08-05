@@ -139,7 +139,7 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="venue">Venue</Label>
           <Input id="venue" value={values.venue} onChange={(e) => set("venue", e.target.value)} />
@@ -154,7 +154,7 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
           <Label htmlFor="eventDate">Event date *</Label>
           <Input
@@ -187,7 +187,7 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="registrationDeadline">Registration deadline</Label>
           <Input
@@ -212,7 +212,7 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ImageUploadField label="Event logo" value={values.logo} onChange={(v) => set("logo", v)} />
         <ImageUploadField label="Event banner" value={values.banner} onChange={(v) => set("banner", v)} />
       </div>

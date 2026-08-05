@@ -194,12 +194,20 @@ export default function CheckInPage() {
         </Button>
       </div>
 
-      <div className="flex gap-2">
-        <Button variant={mode === "scan" ? "default" : "outline"} onClick={() => setMode("scan")}>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={mode === "scan" ? "default" : "outline"}
+          size="lg"
+          onClick={() => setMode("scan")}
+        >
           <QrCode className="h-4 w-4" />
           Scan QR
         </Button>
-        <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")}>
+        <Button
+          variant={mode === "manual" ? "default" : "outline"}
+          size="lg"
+          onClick={() => setMode("manual")}
+        >
           <Search className="h-4 w-4" />
           Manual search
         </Button>
@@ -251,11 +259,11 @@ export default function CheckInPage() {
                 {results.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center justify-between rounded-md border border-border p-3"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3"
                   >
-                    <div>
-                      <p className="font-medium">{a.fullName}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{a.fullName}</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         {a.registrationNumber} - {a.email ?? a.phone ?? "no contact info"}
                       </p>
                     </div>
@@ -266,7 +274,6 @@ export default function CheckInPage() {
                       {a.checkedIn ? (
                         <Button
                           variant="ghost"
-                          size="sm"
                           disabled={busyId === a.id}
                           onClick={() => handleUndo(a)}
                         >
@@ -274,7 +281,7 @@ export default function CheckInPage() {
                           Undo
                         </Button>
                       ) : (
-                        <Button size="sm" disabled={busyId === a.id} onClick={() => handleManualCheckIn(a)}>
+                        <Button disabled={busyId === a.id} onClick={() => handleManualCheckIn(a)}>
                           Check in
                         </Button>
                       )}

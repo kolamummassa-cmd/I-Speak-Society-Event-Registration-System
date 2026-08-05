@@ -87,12 +87,12 @@ export default function AttendeesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Attendees</h1>
           <p className="text-sm text-muted-foreground">{total} registered</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             disabled={isExporting !== null}
@@ -148,58 +148,94 @@ export default function AttendeesPage() {
         ) : attendees.length === 0 ? (
           <p className="p-6 text-sm text-muted-foreground">No attendees match your filters.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
-              <tr>
-                <th className="p-4 font-medium">Name</th>
-                <th className="p-4 font-medium">Reg. number</th>
-                <th className="p-4 font-medium">Contact</th>
-                <th className="p-4 font-medium">Organization</th>
-                <th className="p-4 font-medium">Registered</th>
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Below md: stacked cards, no sideways scrolling. */}
+            <div className="flex flex-col divide-y divide-border md:hidden">
               {attendees.map((a) => (
-                <tr key={a.id} className="border-b border-border last:border-0">
-                  <td className="p-4 font-medium">
-                    <Link href={`/events/${params.id}/attendees/${a.id}`} className="hover:underline">
+                <div key={a.id} className="flex flex-col gap-2 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <Link
+                      href={`/events/${params.id}/attendees/${a.id}`}
+                      className="font-medium hover:underline"
+                    >
                       {a.fullName}
                     </Link>
-                  </td>
-                  <td className="p-4 text-muted-foreground">{a.registrationNumber}</td>
-                  <td className="p-4 text-muted-foreground">
-                    {a.email ?? a.phone ?? "-"}
-                  </td>
-                  <td className="p-4 text-muted-foreground">{a.organization ?? "-"}</td>
-                  <td className="p-4 text-muted-foreground">
-                    {formatDate(a.registeredAt)} {formatTime(a.registeredAt)}
-                  </td>
-                  <td className="p-4">
                     <Badge variant={a.checkedIn ? "default" : "secondary"}>
                       {a.checkedIn ? "Checked in" : "Registered"}
                     </Badge>
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/events/${params.id}/attendees/${a.id}`}>View</Link>
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id, a.fullName)}>
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{a.registrationNumber}</p>
+                  <p className="text-sm text-muted-foreground">{a.email ?? a.phone ?? "No contact info"}</p>
+                  {a.organization && <p className="text-sm text-muted-foreground">{a.organization}</p>}
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(a.registeredAt)} {formatTime(a.registeredAt)}
+                  </p>
+                  <div className="flex gap-2 pt-1">
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                      <Link href={`/events/${params.id}/attendees/${a.id}`}>View</Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id, a.fullName)}>
+                      Delete
+                    </Button>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* md and up: full table. */}
+            <table className="hidden w-full text-sm md:table">
+              <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
+                <tr>
+                  <th className="p-4 font-medium">Name</th>
+                  <th className="p-4 font-medium">Reg. number</th>
+                  <th className="p-4 font-medium">Contact</th>
+                  <th className="p-4 font-medium">Organization</th>
+                  <th className="p-4 font-medium">Registered</th>
+                  <th className="p-4 font-medium">Status</th>
+                  <th className="p-4 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendees.map((a) => (
+                  <tr key={a.id} className="border-b border-border last:border-0">
+                    <td className="p-4 font-medium">
+                      <Link href={`/events/${params.id}/attendees/${a.id}`} className="hover:underline">
+                        {a.fullName}
+                      </Link>
+                    </td>
+                    <td className="p-4 text-muted-foreground">{a.registrationNumber}</td>
+                    <td className="p-4 text-muted-foreground">
+                      {a.email ?? a.phone ?? "-"}
+                    </td>
+                    <td className="p-4 text-muted-foreground">{a.organization ?? "-"}</td>
+                    <td className="p-4 text-muted-foreground">
+                      {formatDate(a.registeredAt)} {formatTime(a.registeredAt)}
+                    </td>
+                    <td className="p-4">
+                      <Badge variant={a.checkedIn ? "default" : "secondary"}>
+                        {a.checkedIn ? "Checked in" : "Registered"}
+                      </Badge>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/events/${params.id}/attendees/${a.id}`}>View</Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id, a.fullName)}>
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </Card>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
             Page {page} of {totalPages}
           </p>

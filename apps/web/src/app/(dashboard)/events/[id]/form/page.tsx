@@ -106,7 +106,7 @@ export default function FormBuilderPage() {
         <div className="flex flex-col gap-3">
           {fields.map((field, index) => (
             <Card key={field.id}>
-              <CardContent className="flex items-center justify-between gap-4 py-4">
+              <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div className="flex min-w-0 flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate font-medium">{field.label}</p>
@@ -118,7 +118,7 @@ export default function FormBuilderPage() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     Visible
                     <Switch
