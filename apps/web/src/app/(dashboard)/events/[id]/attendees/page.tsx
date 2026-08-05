@@ -94,7 +94,7 @@ export default function AttendeesPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
-            variant="outline"
+            variant="accent"
             disabled={isExporting !== null}
             onClick={() => handleExport("pdf")}
           >
@@ -102,7 +102,7 @@ export default function AttendeesPage() {
             {isExporting === "pdf" ? "Preparing..." : "Attendee Report (PDF)"}
           </Button>
           <Button
-            variant="outline"
+            variant="accent"
             disabled={isExporting !== null}
             onClick={() => handleExport("xlsx")}
           >
@@ -140,7 +140,7 @@ export default function AttendeesPage() {
         </Select>
       </div>
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden hover:translate-y-0 hover:shadow-sm">
         {isLoading ? (
           <p className="p-6 text-sm text-muted-foreground">Loading attendees...</p>
         ) : error ? (
@@ -160,7 +160,7 @@ export default function AttendeesPage() {
                     >
                       {a.fullName}
                     </Link>
-                    <Badge variant={a.checkedIn ? "default" : "secondary"}>
+                    <Badge variant={a.checkedIn ? "default" : "success"}>
                       {a.checkedIn ? "Checked in" : "Registered"}
                     </Badge>
                   </div>
@@ -184,7 +184,7 @@ export default function AttendeesPage() {
 
             {/* md and up: full table. */}
             <table className="hidden w-full text-sm md:table">
-              <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
+              <thead className="sticky top-0 z-10 border-b border-border bg-muted/50 text-left text-muted-foreground backdrop-blur-sm">
                 <tr>
                   <th className="p-4 font-medium">Name</th>
                   <th className="p-4 font-medium">Reg. number</th>
@@ -197,7 +197,10 @@ export default function AttendeesPage() {
               </thead>
               <tbody>
                 {attendees.map((a) => (
-                  <tr key={a.id} className="border-b border-border last:border-0">
+                  <tr
+                    key={a.id}
+                    className="border-b border-border transition-colors last:border-0 hover:bg-muted/50"
+                  >
                     <td className="p-4 font-medium">
                       <Link href={`/events/${params.id}/attendees/${a.id}`} className="hover:underline">
                         {a.fullName}
@@ -212,7 +215,7 @@ export default function AttendeesPage() {
                       {formatDate(a.registeredAt)} {formatTime(a.registeredAt)}
                     </td>
                     <td className="p-4">
-                      <Badge variant={a.checkedIn ? "default" : "secondary"}>
+                      <Badge variant={a.checkedIn ? "default" : "success"}>
                         {a.checkedIn ? "Checked in" : "Registered"}
                       </Badge>
                     </td>

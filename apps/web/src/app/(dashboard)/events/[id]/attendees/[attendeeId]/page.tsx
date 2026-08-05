@@ -133,7 +133,7 @@ export default function AttendeeDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Badge variant={attendee.checkedIn ? "default" : "secondary"}>
+          <Badge variant={attendee.checkedIn ? "default" : "success"}>
             {attendee.checkedIn ? "Checked in" : "Not checked in"}
           </Badge>
           <Button asChild variant="outline">

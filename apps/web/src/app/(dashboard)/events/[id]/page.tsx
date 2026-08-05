@@ -108,6 +108,9 @@ export default function EventDetailPage() {
               <img
                 src={event.qrCodeImageUrl}
                 alt={`QR code for ${event.name}`}
+                // Intentionally white in both themes: QR scanners need a
+                // light quiet-zone margin around the code for reliable
+                // contrast, same reasoning as keeping guest-facing pages light.
                 className="h-48 w-48 rounded-md border border-border bg-white p-2"
               />
               <div className="flex flex-col gap-3">
@@ -144,7 +147,7 @@ export default function EventDetailPage() {
                 QR code generation didn&apos;t complete when this event was created.
               </p>
               <div>
-                <Button disabled={isRegenerating} onClick={handleRegenerate}>
+                <Button variant="accent" disabled={isRegenerating} onClick={handleRegenerate}>
                   <RefreshCw className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
                   Generate QR code
                 </Button>

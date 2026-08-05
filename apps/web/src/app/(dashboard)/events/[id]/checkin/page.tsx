@@ -268,7 +268,7 @@ export default function CheckInPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={a.checkedIn ? "default" : "secondary"}>
+                      <Badge variant={a.checkedIn ? "default" : "success"}>
                         {a.checkedIn ? "Checked in" : "Not checked in"}
                       </Badge>
                       {a.checkedIn ? (

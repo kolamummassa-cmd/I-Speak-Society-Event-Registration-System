@@ -19,10 +19,13 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+// Chart color rotation per the design spec: blue, turquoise, purple, amber, green.
+const CHART_COLORS = ["bg-primary", "bg-accent", "bg-purple", "bg-warning", "bg-success"];
+
 // Plain divs sized by percentage instead of a charting library - keeps this
 // dashboard dependency-free, same approach as the hand-rolled badge/QR bits
 // from earlier phases.
-function TimelineChart({ points }: { points: TimelinePoint[] }) {
+function TimelineChart({ points, color = "bg-primary" }: { points: TimelinePoint[]; color?: string }) {
   if (points.length === 0) {
     return <p className="text-sm text-muted-foreground">No data yet.</p>;
   }
@@ -33,7 +36,7 @@ function TimelineChart({ points }: { points: TimelinePoint[] }) {
         <div key={`${point.label}-${i}`} className="flex min-w-10 flex-col items-center gap-1">
           <span className="text-xs text-muted-foreground">{point.count}</span>
           <div
-            className="w-6 rounded-t bg-primary"
+            className={`w-6 rounded-t ${color} transition-all duration-300`}
             style={{ height: `${Math.max((point.count / max) * 120, 4)}px` }}
           />
           <span className="whitespace-nowrap text-[10px] text-muted-foreground">{point.label}</span>
@@ -49,22 +52,26 @@ function DistributionList({ items }: { items: DistributionItem[] }) {
   }
   return (
     <div className="flex flex-col gap-3">
-      {items.map((item) => (
-        <div key={item.label} className="flex flex-col gap-1">
-          <div className="flex items-center justify-between text-sm">
-            <span>{item.label}</span>
-            <span className="text-muted-foreground">
-              {item.count} &middot; {item.percentage}%
-            </span>
+      {items.map((item, i) => {
+        const color = CHART_COLORS[i % CHART_COLORS.length];
+        return (
+          <div key={item.label} className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-sm">
+              <span className={`h-2 w-2 shrink-0 rounded-full ${color}`} />
+              <span className="flex-1">{item.label}</span>
+              <span className="text-muted-foreground">
+                {item.count} &middot; {item.percentage}%
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full rounded-full ${color} transition-all duration-300`}
+                style={{ width: `${item.percentage}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary"
-              style={{ width: `${item.percentage}%` }}
-            />
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -113,7 +120,7 @@ export default function EventAnalyticsPage() {
           <CardTitle>Check-ins by hour</CardTitle>
         </CardHeader>
         <CardContent>
-          <TimelineChart points={analytics.checkInTimeline} />
+          <TimelineChart points={analytics.checkInTimeline} color="bg-accent" />
         </CardContent>
       </Card>
 

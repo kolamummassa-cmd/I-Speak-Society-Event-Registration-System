@@ -57,7 +57,7 @@ export default function EventsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Events</h1>
-        <Button asChild>
+        <Button asChild variant="accent">
           <Link href="/events/new">
             <Plus className="h-4 w-4" />
             Create event
@@ -75,7 +75,7 @@ export default function EventsPage() {
         className="max-w-sm"
       />
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden hover:translate-y-0 hover:shadow-sm">
         {isLoading ? (
           <p className="p-6 text-sm text-muted-foreground">Loading events...</p>
         ) : error ? (
@@ -118,7 +118,7 @@ export default function EventsPage() {
 
             {/* md and up: full table. */}
             <table className="hidden w-full text-sm md:table">
-              <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
+              <thead className="sticky top-0 z-10 border-b border-border bg-muted/50 text-left text-muted-foreground backdrop-blur-sm">
                 <tr>
                   <th className="p-4 font-medium">Name</th>
                   <th className="p-4 font-medium">Date</th>
@@ -130,7 +130,10 @@ export default function EventsPage() {
               </thead>
               <tbody>
                 {events.map((event) => (
-                  <tr key={event.id} className="border-b border-border last:border-0">
+                  <tr
+                    key={event.id}
+                    className="border-b border-border transition-colors last:border-0 hover:bg-muted/50"
+                  >
                     <td className="p-4 font-medium">
                       <Link href={`/events/${event.id}`} className="hover:underline">
                         {event.name}
