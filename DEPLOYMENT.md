@@ -17,6 +17,29 @@ as environment variables.
    read `render.yaml` and create two services: `isociety-api` and
    `isociety-web`.
 
+## Manual setup (if not using Blueprint)
+
+If you create the two services by hand instead (**New > Web Service**,
+picked twice) rather than **New > Blueprint**, `render.yaml` is ignored and
+you fill these in yourself:
+
+**`isociety-api`**
+- Root Directory: leave blank (repo root)
+- Build Command: `pnpm install --frozen-lockfile && pnpm --filter @isociety/database run generate && pnpm --filter @isociety/database run migrate:deploy && pnpm --filter api run build`
+- Start Command: `pnpm --filter api run start`
+- Health Check Path: `/api/health`
+
+**`isociety-web`**
+- Root Directory: leave blank (repo root)
+- Build Command: `pnpm install --frozen-lockfile && pnpm --filter web run build`
+- Start Command: `pnpm --filter web run start`
+
+Do not add `corepack enable`/`corepack prepare` to either command - Render's
+Node image already provides pnpm via corepack (it reads the root
+`package.json`'s `"packageManager"` field automatically), and running those
+commands fails with `EROFS: read-only file system` since Render's corepack
+shim path can't be rewritten.
+
 ## Environment variables
 
 Render creates the env var *names* from `render.yaml` automatically, but

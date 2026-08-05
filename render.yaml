@@ -14,9 +14,12 @@ services:
     name: isociety-api
     runtime: node
     plan: starter
+    # Render's Node image already ships pnpm via corepack, which reads the
+    # root package.json's "packageManager" field to fetch/run pnpm@11.20.0
+    # automatically - no `corepack enable`/`prepare` needed (and calling
+    # those fails with EROFS, since Render's corepack shim path is
+    # read-only).
     buildCommand: >-
-      corepack enable &&
-      corepack prepare pnpm@11.20.0 --activate &&
       pnpm install --frozen-lockfile &&
       pnpm --filter @isociety/database run generate &&
       pnpm --filter @isociety/database run migrate:deploy &&
@@ -63,8 +66,6 @@ services:
     runtime: node
     plan: starter
     buildCommand: >-
-      corepack enable &&
-      corepack prepare pnpm@11.20.0 --activate &&
       pnpm install --frozen-lockfile &&
       pnpm --filter web run build
     startCommand: pnpm --filter web run start
