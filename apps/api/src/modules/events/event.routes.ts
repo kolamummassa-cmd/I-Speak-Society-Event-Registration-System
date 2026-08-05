@@ -12,6 +12,7 @@ import {
   updateEventHandler,
 } from "./event.controller";
 import { formRouter } from "../forms/form.routes";
+import { attendeeRouter } from "../attendees/attendee.routes";
 
 export const eventRouter = Router();
 
@@ -27,3 +28,4 @@ eventRouter.patch("/:id", validateBody(updateEventSchema), asyncHandler(updateEv
 eventRouter.delete("/:id", asyncHandler(deleteEventHandler));
 eventRouter.post("/:id/qrcode", asyncHandler(regenerateQrCodeHandler));
 eventRouter.use("/:id/form", formRouter);
+eventRouter.use("/:id/attendees", attendeeRouter);

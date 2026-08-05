@@ -1,3 +1,5 @@
+export * from "./attendee.dto";
 export * from "./auth.dto";
 export * from "./event.dto";
 export * from "./form.dto";
+export * from "./registration.dto";

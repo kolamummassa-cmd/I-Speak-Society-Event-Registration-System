@@ -8,6 +8,7 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { authRouter } from "./modules/auth/auth.routes";
 import { eventRouter } from "./modules/events/event.routes";
 import { uploadRouter } from "./modules/uploads/upload.routes";
+import { publicRouter } from "./modules/public/public.routes";
 
 export function createApp() {
   const app = express();
@@ -30,6 +31,7 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/events", eventRouter);
   app.use("/api/uploads", uploadRouter);
+  app.use("/api/public", publicRouter);
 
   // Further feature routes are mounted here as each module is built:
   // app.use("/api/attendees", attendeeRouter);

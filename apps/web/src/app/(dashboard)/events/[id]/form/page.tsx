@@ -123,6 +123,7 @@ export default function FormBuilderPage() {
                     Visible
                     <Switch
                       checked={field.isVisible}
+                      disabled={field.fieldKey === "full_name"}
                       onCheckedChange={(checked) => toggle(field, "isVisible", checked)}
                     />
                   </label>

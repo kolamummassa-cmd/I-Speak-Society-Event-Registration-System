@@ -1,7 +1,7 @@
 import { prisma } from "@isociety/database";
 
 interface RecordAuditLogInput {
-  userId: string;
+  userId?: string; // omitted for guest-initiated actions (e.g. public registration)
   action: string;
   entityType: string;
   entityId: string;
