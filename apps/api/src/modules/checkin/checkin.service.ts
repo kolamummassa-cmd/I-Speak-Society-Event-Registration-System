@@ -4,10 +4,11 @@ import * as attendeeRepository from "../attendees/attendee.repository";
 import { toSummary } from "../attendees/attendee.service";
 import * as checkinRepository from "./checkin.repository";
 
-// Attendee QR codes encode `${APP_BASE_URL}/checkin/<attendeeId>` (see
-// public.service.ts, generateQrDataUrl). Accept either that full URL or a
-// bare attendee ID, in case a scanner library hands back just the path or
-// someone pastes the ID in manually.
+// Attendee QR codes encode `<web app origin>/checkin/<attendeeId>` (see
+// public.service.ts, generateQrDataUrl - the origin is whatever domain
+// triggered the QR's generation, not a fixed value). Accept either that
+// full URL or a bare attendee ID, in case a scanner library hands back
+// just the path or someone pastes the ID in manually.
 function extractAttendeeId(payload: string): string {
   const match = payload.match(/\/checkin\/([^/?#]+)/);
   return decodeURIComponent(match?.[1] ?? payload.trim());

@@ -30,7 +30,7 @@ export async function getEvent(id: string) {
   return toSummary(event);
 }
 
-export async function createEvent(input: CreateEventInput, userId: string) {
+export async function createEvent(input: CreateEventInput, userId: string, baseUrl: string) {
   const event = await eventRepository.create({
     ...input,
     logoUrl: input.logoUrl || null,
@@ -53,7 +53,7 @@ export async function createEvent(input: CreateEventInput, userId: string) {
   // because of a QR/Cloudinary hiccup. If this fails, qrCodeImageUrl stays
   // null and the organizer can retry via POST /events/:id/qrcode.
   try {
-    const withQrCode = await generateEventQrCode(event.id);
+    const withQrCode = await generateEventQrCode(event.id, baseUrl);
     return toSummary(withQrCode);
   } catch (err) {
     console.error(`Failed to generate QR code for event ${event.id}:`, err);
@@ -61,11 +61,11 @@ export async function createEvent(input: CreateEventInput, userId: string) {
   }
 }
 
-export async function regenerateQrCode(id: string, userId: string) {
+export async function regenerateQrCode(id: string, userId: string, baseUrl: string) {
   const existing = await eventRepository.findById(id);
   if (!existing) throw new AppError(404, "Event not found");
 
-  const event = await generateEventQrCode(id);
+  const event = await generateEventQrCode(id, baseUrl);
 
   await recordAuditLog({
     userId,

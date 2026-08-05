@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { ListEventsQuery } from "@isociety/shared";
 import { requireParam } from "../../utils/requireParam";
+import { resolveAppBaseUrl } from "../../utils/resolveAppBaseUrl";
 import * as eventService from "./event.service";
 
 export async function listEventsHandler(req: Request, res: Response) {
@@ -15,7 +16,7 @@ export async function getEventHandler(req: Request, res: Response) {
 }
 
 export async function createEventHandler(req: Request, res: Response) {
-  const event = await eventService.createEvent(req.body, req.user!.sub);
+  const event = await eventService.createEvent(req.body, req.user!.sub, resolveAppBaseUrl(req));
   res.status(201).json({ success: true, data: { event } });
 }
 
@@ -30,6 +31,10 @@ export async function deleteEventHandler(req: Request, res: Response) {
 }
 
 export async function regenerateQrCodeHandler(req: Request, res: Response) {
-  const event = await eventService.regenerateQrCode(requireParam(req, "id"), req.user!.sub);
+  const event = await eventService.regenerateQrCode(
+    requireParam(req, "id"),
+    req.user!.sub,
+    resolveAppBaseUrl(req)
+  );
   res.status(200).json({ success: true, data: { event } });
 }

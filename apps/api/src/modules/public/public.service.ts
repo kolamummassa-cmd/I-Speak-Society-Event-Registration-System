@@ -6,7 +6,6 @@ import { AppError } from "../../middleware/errorHandler";
 import { recordAuditLog } from "../../utils/audit";
 import { generateRegistrationNumber } from "../../utils/registrationNumber";
 import { DEFAULT_FIELD_COLUMNS } from "../../utils/defaultFieldColumns";
-import { env } from "../../config/env";
 
 const formInclude = {
   fields: {
@@ -71,18 +70,23 @@ export async function getPublicEvent(eventId: string) {
   return { event: toPublicEvent(event), form };
 }
 
-function buildAttendeeQrPayload(attendeeId: string): string {
+function buildAttendeeQrPayload(attendeeId: string, baseUrl: string): string {
   // Encodes the same base URL scheme as event QR codes, but under /checkin/
   // so Phase 9's scanner can tell "this is an attendee code" from "this is
-  // an event registration link" at a glance if ever needed.
-  return `${env.APP_BASE_URL}/checkin/${attendeeId}`;
+  // an event registration link" at a glance if ever needed. `baseUrl` comes
+  // from the triggering request's Origin (see utils/resolveAppBaseUrl.ts).
+  return `${baseUrl}/checkin/${attendeeId}`;
 }
 
-async function generateQrDataUrl(attendeeId: string): Promise<string> {
-  return QRCode.toDataURL(buildAttendeeQrPayload(attendeeId), { width: 320, margin: 2 });
+async function generateQrDataUrl(attendeeId: string, baseUrl: string): Promise<string> {
+  return QRCode.toDataURL(buildAttendeeQrPayload(attendeeId, baseUrl), { width: 320, margin: 2 });
 }
 
-export async function registerAttendee(eventId: string, input: RegisterAttendeeInput) {
+export async function registerAttendee(
+  eventId: string,
+  input: RegisterAttendeeInput,
+  baseUrl: string
+) {
   const { event, form } = await loadEventAndForm(eventId);
   const publicEvent = toPublicEvent(event);
 
@@ -200,11 +204,11 @@ export async function registerAttendee(eventId: string, input: RegisterAttendeeI
       fullName: attendee.fullName,
     },
     event: publicEvent,
-    qrCodeDataUrl: await generateQrDataUrl(attendee.id),
+    qrCodeDataUrl: await generateQrDataUrl(attendee.id, baseUrl),
   };
 }
 
-export async function getRegistration(attendeeId: string) {
+export async function getRegistration(attendeeId: string, baseUrl: string) {
   const attendee = await prisma.attendee.findUnique({ where: { id: attendeeId } });
   if (!attendee) throw new AppError(404, "Registration not found");
 
@@ -218,6 +222,6 @@ export async function getRegistration(attendeeId: string) {
       fullName: attendee.fullName,
     },
     event: toPublicEvent(event),
-    qrCodeDataUrl: await generateQrDataUrl(attendee.id),
+    qrCodeDataUrl: await generateQrDataUrl(attendee.id, baseUrl),
   };
 }
