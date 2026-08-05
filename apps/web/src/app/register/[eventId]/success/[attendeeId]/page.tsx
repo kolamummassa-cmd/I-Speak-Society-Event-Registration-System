@@ -10,9 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { generateBadgeDataUrl } from "@/lib/badge";
 import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { useSystemTheme } from "@/lib/use-system-theme";
 
 export default function RegistrationSuccessPage() {
   const params = useParams<{ eventId: string; attendeeId: string }>();
+  const theme = useSystemTheme();
+  const themeClass = cn("text-foreground", theme === "dark" ? "dark" : "");
   const [result, setResult] = useState<RegistrationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -47,7 +51,7 @@ export default function RegistrationSuccessPage() {
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-muted px-4">
+      <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}>
         <p className="text-sm text-destructive">{error}</p>
       </main>
     );
@@ -55,14 +59,14 @@ export default function RegistrationSuccessPage() {
 
   if (!result) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-muted px-4">
+      <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}>
         <p className="text-sm text-muted-foreground">Loading...</p>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
+    <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4 py-8", themeClass)}>
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
           <CheckCircle2 className="mb-2 h-12 w-12 text-primary" />
