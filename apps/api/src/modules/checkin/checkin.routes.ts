@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { scanCheckInSchema } from "@isociety/shared";
+import { checkinLimiter } from "../../middleware/rateLimiter";
 import { validateBody } from "../../middleware/validate";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { scanCheckInHandler } from "./checkin.controller";
@@ -10,4 +11,9 @@ import { scanCheckInHandler } from "./checkin.controller";
 // since they're keyed off an attendee, not a scanned payload.
 export const checkinRouter = Router({ mergeParams: true });
 
-checkinRouter.post("/scan", validateBody(scanCheckInSchema), asyncHandler(scanCheckInHandler));
+checkinRouter.post(
+  "/scan",
+  checkinLimiter,
+  validateBody(scanCheckInSchema),
+  asyncHandler(scanCheckInHandler)
+);

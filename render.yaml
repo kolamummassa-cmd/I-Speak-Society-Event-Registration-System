@@ -1,0 +1,77 @@
+# Render Blueprint - deploys both apps/api and apps/web as separate web
+# services from this one monorepo. Import this repo on Render as a
+# "Blueprint" and it will pick this file up automatically.
+#
+# Neon (database) and Cloudinary (images) are external managed services -
+# there's nothing to declare for them here, just env vars pointing at them
+# (see the `sync: false` entries below, which you fill in from the Render
+# dashboard after the first deploy).
+#
+# `plan: starter` is Render's cheapest paid tier that still supports
+# Blueprints - bump it in the dashboard later if traffic grows.
+services:
+  - type: web
+    name: isociety-api
+    runtime: node
+    plan: starter
+    buildCommand: >-
+      corepack enable &&
+      corepack prepare pnpm@11.20.0 --activate &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @isociety/database run generate &&
+      pnpm --filter @isociety/database run migrate:deploy &&
+      pnpm --filter api run build
+    # Runs via tsx, not the tsc build output - @isociety/shared and
+    # @isociety/database are consumed as raw TypeScript source (no build
+    # step of their own, same as in `pnpm dev`), and tsx transpiles
+    # everything it imports on the fly regardless of workspace boundaries.
+    # `pnpm --filter api run build` above still runs as a type-check gate,
+    # it just isn't what actually executes.
+    startCommand: pnpm --filter api run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set this to your deployed web URL(s) once known - comma-separated
+      # if you need more than one (e.g. while testing a Render preview URL
+      # alongside the real one).
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      # The web app's public URL - used to build registration links and the
+      # QR code payloads attendees scan.
+      - key: APP_BASE_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  - type: web
+    name: isociety-web
+    runtime: node
+    plan: starter
+    buildCommand: >-
+      corepack enable &&
+      corepack prepare pnpm@11.20.0 --activate &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter web run build
+    startCommand: pnpm --filter web run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The API service's public URL, with /api appended - e.g.
+      # https://isociety-api.onrender.com/api
+      - key: NEXT_PUBLIC_API_URL
+        sync: false

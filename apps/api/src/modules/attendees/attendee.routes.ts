@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { listAttendeesQuerySchema, updateAttendeeSchema } from "@isociety/shared";
+import { checkinLimiter } from "../../middleware/rateLimiter";
 import { validateBody, validateQuery } from "../../middleware/validate";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { manualCheckInHandler, undoCheckInHandler } from "../checkin/checkin.controller";
@@ -22,5 +23,5 @@ attendeeRouter.patch(
   asyncHandler(updateAttendeeHandler)
 );
 attendeeRouter.delete("/:attendeeId", asyncHandler(deleteAttendeeHandler));
-attendeeRouter.post("/:attendeeId/checkin", asyncHandler(manualCheckInHandler));
-attendeeRouter.delete("/:attendeeId/checkin", asyncHandler(undoCheckInHandler));
+attendeeRouter.post("/:attendeeId/checkin", checkinLimiter, asyncHandler(manualCheckInHandler));
+attendeeRouter.delete("/:attendeeId/checkin", checkinLimiter, asyncHandler(undoCheckInHandler));
