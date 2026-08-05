@@ -96,6 +96,7 @@ model Event {
   // Cached at creation time so we don't regenerate on every request.
   registrationUrl String?
   qrCodeImageUrl  String?
+  qrCodePublicId  String? // Cloudinary public_id, needed to delete/regenerate it
 
   createdById String
   createdAt   DateTime @default(now())

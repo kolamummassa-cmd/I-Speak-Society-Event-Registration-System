@@ -97,7 +97,11 @@ export default function EventsPage() {
             <tbody>
               {events.map((event) => (
                 <tr key={event.id} className="border-b border-border last:border-0">
-                  <td className="p-4 font-medium">{event.name}</td>
+                  <td className="p-4 font-medium">
+                    <Link href={`/events/${event.id}`} className="hover:underline">
+                      {event.name}
+                    </Link>
+                  </td>
                   <td className="p-4">{formatDate(event.eventDate)}</td>
                   <td className="p-4 text-muted-foreground">{event.venue ?? "-"}</td>
                   <td className="p-4">{event.attendeeCount}</td>
@@ -106,6 +110,9 @@ export default function EventsPage() {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex justify-end gap-2">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/events/${event.id}`}>View</Link>
+                      </Button>
                       <Button asChild variant="outline" size="sm">
                         <Link href={`/events/${event.id}/edit`}>Edit</Link>
                       </Button>

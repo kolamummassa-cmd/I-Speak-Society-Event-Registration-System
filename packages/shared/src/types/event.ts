@@ -17,6 +17,7 @@ export interface EventSummary {
   status: EventStatus;
   registrationUrl: string | null;
   qrCodeImageUrl: string | null;
+  qrCodePublicId: string | null;
   createdById: string;
   createdAt: string;
   updatedAt: string;

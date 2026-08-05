@@ -28,3 +28,8 @@ export async function deleteEventHandler(req: Request, res: Response) {
   await eventService.deleteEvent(requireParam(req, "id"), req.user!.sub);
   res.status(204).send();
 }
+
+export async function regenerateQrCodeHandler(req: Request, res: Response) {
+  const event = await eventService.regenerateQrCode(requireParam(req, "id"), req.user!.sub);
+  res.status(200).json({ success: true, data: { event } });
+}

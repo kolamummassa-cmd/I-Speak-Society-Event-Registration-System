@@ -8,6 +8,7 @@ import {
   deleteEventHandler,
   getEventHandler,
   listEventsHandler,
+  regenerateQrCodeHandler,
   updateEventHandler,
 } from "./event.controller";
 
@@ -23,3 +24,4 @@ eventRouter.get("/:id", asyncHandler(getEventHandler));
 eventRouter.post("/", validateBody(createEventSchema), asyncHandler(createEventHandler));
 eventRouter.patch("/:id", validateBody(updateEventSchema), asyncHandler(updateEventHandler));
 eventRouter.delete("/:id", asyncHandler(deleteEventHandler));
+eventRouter.post("/:id/qrcode", asyncHandler(regenerateQrCodeHandler));
