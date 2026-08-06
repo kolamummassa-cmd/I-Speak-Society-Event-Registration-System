@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { EventStatus, EventSummary } from "@isociety/shared";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -124,9 +125,11 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-2xl">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Event name *</Label>
+    <Card className="mx-auto w-full max-w-2xl border-border/60 bg-card/80 shadow-xl backdrop-blur-xl hover:translate-y-0 hover:shadow-xl">
+      <CardContent className="p-6 sm:p-8">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="name">Event name *</Label>
         <Input id="name" required value={values.name} onChange={(e) => set("name", e.target.value)} />
       </div>
 
@@ -224,6 +227,8 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
           {isSubmitting ? "Saving..." : submitLabel}
         </Button>
       </div>
-    </form>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

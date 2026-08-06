@@ -44,8 +44,8 @@ export default function EditEventPage() {
   if (!initialValues) return <p className="text-sm text-muted-foreground">Loading...</p>;
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Edit event</h1>
+    <div className="mx-auto flex max-w-2xl flex-col gap-4 py-4">
+      <h1 className="text-center text-2xl font-semibold">Edit event</h1>
       <EventForm initialValues={initialValues} submitLabel="Save changes" onSubmit={handleSubmit} />
     </div>
   );
