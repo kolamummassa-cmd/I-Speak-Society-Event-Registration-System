@@ -61,7 +61,9 @@ function LoginForm() {
         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       </Button>
       <Card className="relative z-10 w-full max-w-sm">
-        <CardHeader>
+        <CardHeader className="items-center text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- small static local asset */}
+          <img src="/logo.jpg" alt="I Speak Society" className="mb-2 h-14 w-14 rounded-xl shadow-sm" />
           <CardTitle>I Speak Society</CardTitle>
           <CardDescription>Sign in to manage events and registrations.</CardDescription>
         </CardHeader>
