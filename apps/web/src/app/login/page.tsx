@@ -2,15 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
 import { ApiError } from "@/lib/api-client";
+import { ThemeProvider, useTheme } from "@/context/theme-context";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
+  return (
+    <ThemeProvider>
+      <LoginForm />
+    </ThemeProvider>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,8 +44,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
-      <Card className="w-full max-w-sm">
+    <div
+      className={cn(
+        "relative flex min-h-screen items-center justify-center bg-muted px-4 text-foreground",
+        theme === "dark" ? "dark" : ""
+      )}
+    >
+      <div className="dashboard-backdrop" />
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute right-4 top-4 z-10 h-11 w-11 rounded-full bg-black/[0.04] p-0 hover:bg-black/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
+        onClick={toggleTheme}
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </Button>
+      <Card className="relative z-10 w-full max-w-sm">
         <CardHeader>
           <CardTitle>I Speak Society</CardTitle>
           <CardDescription>Sign in to manage events and registrations.</CardDescription>

@@ -13,10 +13,12 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 const STORAGE_KEY = "isociety-dashboard-theme";
 
 /**
- * Scoped to the dashboard route group only - guest-facing pages (public
- * registration, success page, printable badge/report) never render this
- * provider, so they always stay on the default light theme regardless of
- * what an admin has chosen here.
+ * Used by the admin-facing surfaces of the app - the dashboard route group
+ * and the login page - both mount their own instance of this provider and
+ * share the same persisted preference via localStorage. Guest-facing pages
+ * (public registration, success page, printable badge/report) never render
+ * this provider; they follow the visitor's own device preference instead
+ * (see lib/use-system-theme.ts), independent of this admin toggle.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
