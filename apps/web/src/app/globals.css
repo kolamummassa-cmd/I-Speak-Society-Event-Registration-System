@@ -152,6 +152,27 @@
     background: var(--background);
     color: var(--foreground);
   }
+
+  /* Native date/time inputs render their calendar/clock icon (and other
+     browser chrome) using a fixed dark-on-transparent glyph by default,
+     which disappears against a dark input background. color-scheme tells
+     the browser which palette to use for that native rendering, so the
+     icon itself becomes light in dark mode instead of needing a manual
+     icon/filter hack. */
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input[type="month"],
+  input[type="week"] {
+    color-scheme: light;
+  }
+  .dark input[type="date"],
+  .dark input[type="datetime-local"],
+  .dark input[type="time"],
+  .dark input[type="month"],
+  .dark input[type="week"] {
+    color-scheme: dark;
+  }
 }
 
 /* Decorative background layer for the dashboard shell only - two very
