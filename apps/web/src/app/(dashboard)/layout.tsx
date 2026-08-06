@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
@@ -59,6 +59,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
+  // Only the two top-level destinations don't have anywhere sensible to go
+  // "back" to within the app - everything nested (event detail, attendees,
+  // check-in, analytics, form builder, create/edit) gets the arrow.
+  const showBackButton = pathname !== "/dashboard" && pathname !== "/events";
+
   return (
     <div className={cn("relative min-h-screen bg-background text-foreground", theme === "dark" ? "dark" : "")}>
       {/* Decorative depth layer - fixed, pointer-events-none, sits behind everything. */}
@@ -66,18 +71,34 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <header className="sticky top-0 z-40 h-[72px] border-b border-black/[0.06] bg-white/75 backdrop-blur-[18px] dark:border-white/[0.06] dark:bg-[rgba(15,23,42,0.75)]">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#06b6d4] text-sm font-bold text-white shadow-[0_0_25px_rgba(20,184,166,0.35)]">
-              IS
-            </div>
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            {showBackButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-11 w-11 shrink-0 rounded-full bg-black/[0.04] p-0 hover:bg-black/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
+                onClick={() => router.back()}
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            {/* Logo */}
+            <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- small static local asset, not worth Next/Image here */}
+            <img
+              src="/logo.jpg"
+              alt="I Speak Society"
+              className="h-12 w-12 shrink-0 rounded-xl object-cover shadow-[0_0_25px_rgba(20,184,166,0.25)]"
+            />
             <div className="hidden min-w-0 sm:block">
               <p className="truncate text-sm font-semibold">I Speak Society</p>
               <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 Event Registration System
               </p>
             </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Floating pill nav menu - desktop only */}
           <nav className="hidden items-center gap-2 rounded-full border border-primary/[0.18] bg-white/60 p-1.5 shadow-sm dark:border-[rgba(59,130,246,0.18)] dark:bg-[rgba(17,24,39,0.85)] dark:shadow-none md:flex">
