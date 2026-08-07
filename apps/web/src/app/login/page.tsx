@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,13 +15,17 @@ import { cn } from "@/lib/utils";
 export default function LoginPage() {
   return (
     <ThemeProvider>
-      <LoginForm />
+      <Suspense fallback={null}>
+        <LoginForm />
+      </Suspense>
     </ThemeProvider>
   );
 }
 
 function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionExpired = searchParams.get("expired") === "1";
   const { theme, toggleTheme } = useTheme();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
@@ -69,6 +73,11 @@ function LoginForm() {
           <CardDescription>Sign in to manage events and registrations.</CardDescription>
         </CardHeader>
         <CardContent>
+          {sessionExpired && (
+            <p className="mb-4 rounded-md bg-warning/10 px-3 py-2 text-sm text-warning">
+              Your session has expired. Please sign in again.
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">Email</Label>

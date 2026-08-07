@@ -13,6 +13,15 @@ export function getAccessToken() {
   return accessToken;
 }
 
+// Registered by AuthProvider so this module (which has no React/router
+// access of its own) can tell it "the session is actually gone, not just
+// the short-lived access token" whenever a silent refresh fails.
+let sessionExpiredHandler: (() => void) | null = null;
+
+export function setSessionExpiredHandler(handler: (() => void) | null) {
+  sessionExpiredHandler = handler;
+}
+
 export class ApiError extends Error {
   constructor(public readonly status: number, message: string, public readonly details?: unknown) {
     super(message);
@@ -61,6 +70,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     if (refreshed) {
       return request<T>(path, { ...options, skipAuthRetry: true });
     }
+    // The refresh itself failed - the whole session is gone, not just the
+    // access token. /auth/me's own failure is handled locally by
+    // AuthProvider (it just means "not logged in yet", the normal case on
+    // a first visit) - for every other call, that raw backend message
+    // ("Invalid or expired access token") isn't something a user should
+    // ever see, so surface a friendly one and force back to login instead.
+    if (path !== "/auth/me") {
+      sessionExpiredHandler?.();
+      throw new ApiError(401, "Your session has expired. Please sign in again.");
+    }
   }
 
   const body = await res.json().catch(() => null);
@@ -98,6 +117,8 @@ async function upload<T>(path: string, formData: FormData, skipAuthRetry = false
   if (res.status === 401 && !skipAuthRetry) {
     const refreshed = await tryRefresh();
     if (refreshed) return upload<T>(path, formData, true);
+    sessionExpiredHandler?.();
+    throw new ApiError(401, "Your session has expired. Please sign in again.");
   }
 
   const body = await res.json().catch(() => null);
@@ -123,6 +144,8 @@ async function download(
   if (res.status === 401 && !skipAuthRetry) {
     const refreshed = await tryRefresh();
     if (refreshed) return download(path, true);
+    sessionExpiredHandler?.();
+    throw new ApiError(401, "Your session has expired. Please sign in again.");
   }
 
   if (!res.ok) {

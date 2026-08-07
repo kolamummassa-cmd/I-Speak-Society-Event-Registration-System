@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AuthUser } from "@isociety/shared";
-import { apiClient, setAccessToken } from "@/lib/api-client";
+import { apiClient, setAccessToken, setSessionExpiredHandler } from "@/lib/api-client";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -14,6 +15,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,6 +29,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch(() => setUser(null))
       .finally(() => setIsLoading(false));
   }, []);
+
+  // Fires whenever a mid-session request's silent refresh fails - the
+  // session is actually gone (not just the short-lived access token), so
+  // clear local state and send them to login with a message explaining why,
+  // instead of letting the raw backend error surface wherever it happened.
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      setAccessToken(null);
+      setUser(null);
+      router.replace("/login?expired=1");
+    });
+    return () => setSessionExpiredHandler(null);
+  }, [router]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiClient.post<{ data: { accessToken: string; user: AuthUser } }>(
