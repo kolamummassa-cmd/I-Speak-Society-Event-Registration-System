@@ -36,7 +36,10 @@ export function getRefreshTokenExpiry(): Date {
   return new Date(Date.now() + days);
 }
 
-function parseDurationToMs(duration: string): number {
+// Exported so auth.controller.ts can give the refresh cookie's maxAge the
+// same lifetime as the token it carries, instead of two numbers that could
+// silently drift apart.
+export function parseDurationToMs(duration: string): number {
   const match = /^(\d+)([smhd])$/.exec(duration.trim());
   if (!match) return 7 * 24 * 60 * 60 * 1000; // default 7d
   const value = Number(match[1]);

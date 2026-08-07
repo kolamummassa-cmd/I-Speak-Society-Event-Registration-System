@@ -20,7 +20,12 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 characters"),
   JWT_ACCESS_EXPIRES_IN: z.string().default("15m"),
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 characters"),
-  JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
+  // 30d rather than 7d: organizers shouldn't see the login page again after
+  // closing the browser, only after an explicit logout or a full month of
+  // not opening the app at all - each successful silent refresh re-issues a
+  // fresh cookie with this same window, so regular use keeps sliding it
+  // forward indefinitely.
+  JWT_REFRESH_EXPIRES_IN: z.string().default("30d"),
   APP_BASE_URL: z.string().url().default("http://localhost:3000"),
   CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
   CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY is required"),

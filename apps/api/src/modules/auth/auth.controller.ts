@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { env } from "../../config/env";
+import { parseDurationToMs } from "../../utils/jwt";
 import * as authService from "./auth.service";
 
 const REFRESH_COOKIE_NAME = "refreshToken";
@@ -9,6 +10,11 @@ const refreshCookieOptions = {
   secure: env.NODE_ENV === "production",
   sameSite: "lax" as const,
   path: "/api/auth",
+  // Without this, it's a session cookie the browser can drop the moment it
+  // fully closes, even though the refresh token itself is still valid on
+  // the server for JWT_REFRESH_EXPIRES_IN - that mismatch was why staying
+  // logged in across a closed browser/phone didn't reliably work.
+  maxAge: parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN),
 };
 
 export async function loginHandler(req: Request, res: Response) {

@@ -49,7 +49,7 @@ services:
       - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: JWT_REFRESH_EXPIRES_IN
-        value: 7d
+        value: 30d
       # The web app's public URL - used to build registration links and the
       # QR code payloads attendees scan.
       - key: APP_BASE_URL
