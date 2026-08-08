@@ -50,6 +50,7 @@ function LoginForm() {
 
   return (
     <div
+      suppressHydrationWarning
       className={cn(
         "relative flex min-h-screen items-center justify-center bg-muted px-4 text-foreground",
         theme === "dark" ? "dark" : ""

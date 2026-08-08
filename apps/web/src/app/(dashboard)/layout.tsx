@@ -65,7 +65,10 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const showBackButton = pathname !== "/dashboard" && pathname !== "/events";
 
   return (
-    <div className={cn("relative min-h-screen bg-background text-foreground", theme === "dark" ? "dark" : "")}>
+    <div
+      suppressHydrationWarning
+      className={cn("relative min-h-screen bg-background text-foreground", theme === "dark" ? "dark" : "")}
+    >
       {/* Decorative depth layer - fixed, pointer-events-none, sits behind everything. */}
       <div className="dashboard-backdrop" />
 

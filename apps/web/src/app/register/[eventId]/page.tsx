@@ -35,7 +35,10 @@ export default function PublicRegistrationPage() {
 
   if (error) {
     return (
-      <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}>
+      <main
+        suppressHydrationWarning
+        className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}
+      >
         <p className="text-sm text-destructive">{error}</p>
       </main>
     );
@@ -43,7 +46,10 @@ export default function PublicRegistrationPage() {
 
   if (!data) {
     return (
-      <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}>
+      <main
+        suppressHydrationWarning
+        className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}
+      >
         <p className="text-sm text-muted-foreground">Loading...</p>
       </main>
     );
@@ -52,7 +58,7 @@ export default function PublicRegistrationPage() {
   const { event, form } = data;
 
   return (
-    <main className={cn("relative min-h-screen bg-muted", themeClass)}>
+    <main suppressHydrationWarning className={cn("relative min-h-screen bg-muted", themeClass)}>
       {event.bannerUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- remote Cloudinary URL
         <img src={event.bannerUrl} alt="" className="h-48 w-full object-cover sm:h-64" />

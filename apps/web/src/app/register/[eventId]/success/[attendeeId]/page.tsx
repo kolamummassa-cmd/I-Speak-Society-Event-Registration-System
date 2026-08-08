@@ -51,7 +51,10 @@ export default function RegistrationSuccessPage() {
 
   if (error) {
     return (
-      <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}>
+      <main
+        suppressHydrationWarning
+        className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}
+      >
         <p className="text-sm text-destructive">{error}</p>
       </main>
     );
@@ -59,14 +62,20 @@ export default function RegistrationSuccessPage() {
 
   if (!result) {
     return (
-      <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}>
+      <main
+        suppressHydrationWarning
+        className={cn("flex min-h-screen items-center justify-center bg-muted px-4", themeClass)}
+      >
         <p className="text-sm text-muted-foreground">Loading...</p>
       </main>
     );
   }
 
   return (
-    <main className={cn("flex min-h-screen items-center justify-center bg-muted px-4 py-8", themeClass)}>
+    <main
+      suppressHydrationWarning
+      className={cn("flex min-h-screen items-center justify-center bg-muted px-4 py-8", themeClass)}
+    >
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
           <CheckCircle2 className="mb-2 h-12 w-12 text-primary" />

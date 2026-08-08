@@ -46,7 +46,10 @@ function Landing() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className={cn("min-h-screen bg-background text-foreground", theme === "dark" ? "dark" : "")}>
+    <div
+      suppressHydrationWarning
+      className={cn("min-h-screen bg-background text-foreground", theme === "dark" ? "dark" : "")}
+    >
       {/* Hero: the photo + gradient overlay are deliberately theme-independent
           (always a dark scrim under white text) - a bright outdoor photo
           needs a dark overlay for legible text regardless of light/dark mode. */}
