@@ -60,7 +60,6 @@ export default function AttendeeDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [isTogglingCheckIn, setIsTogglingCheckIn] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
@@ -118,26 +117,6 @@ export default function AttendeeDetailPage() {
     router.push(`/events/${params.id}/attendees`);
   }
 
-  async function handleToggleCheckIn() {
-    if (!attendee) return;
-    setIsTogglingCheckIn(true);
-    setError(null);
-    try {
-      const res = attendee.checkedIn
-        ? await apiClient.delete<{ data: { attendee: AttendeeDetail } }>(
-            `/events/${params.id}/attendees/${params.attendeeId}/checkin`
-          )
-        : await apiClient.post<{ data: { attendee: AttendeeDetail } }>(
-            `/events/${params.id}/attendees/${params.attendeeId}/checkin`
-          );
-      setAttendee(res.data.attendee);
-    } catch (err) {
-      setError(formatApiError(err));
-    } finally {
-      setIsTogglingCheckIn(false);
-    }
-  }
-
   if (error && !attendee) return <p className="text-sm text-destructive">{error}</p>;
   if (!attendee || !fields) return <p className="text-sm text-muted-foreground">Loading...</p>;
 
@@ -155,15 +134,6 @@ export default function AttendeeDetailPage() {
           <Badge variant={attendee.checkedIn ? "default" : "success"}>
             {attendee.checkedIn ? "Checked in" : "Not checked in"}
           </Badge>
-          {attendee.checkedIn ? (
-            <Button variant="outline" disabled={isTogglingCheckIn} onClick={handleToggleCheckIn}>
-              {isTogglingCheckIn ? "Undoing..." : "Undo check-in"}
-            </Button>
-          ) : (
-            <Button variant="accent" disabled={isTogglingCheckIn} onClick={handleToggleCheckIn}>
-              {isTogglingCheckIn ? "Checking in..." : "Check in"}
-            </Button>
-          )}
           <Button asChild variant="outline">
             <Link href={`/events/${params.id}/attendees`}>Back to attendees</Link>
           </Button>
