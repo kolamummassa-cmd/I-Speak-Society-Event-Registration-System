@@ -8,6 +8,7 @@ import type { FormField, RegistrationForm } from "@isociety/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Switch } from "@/components/ui/switch";
 import { FieldEditorDialog, type FieldEditorValues } from "@/components/forms/field-editor-dialog";
 import { RegistrationFormPreview } from "@/components/forms/registration-form-preview";
@@ -20,6 +21,7 @@ export default function FormBuilderPage() {
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingField, setEditingField] = useState<FormField | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<FormField | null>(null);
 
   function load() {
     apiClient
@@ -49,7 +51,6 @@ export default function FormBuilderPage() {
   }
 
   async function handleDelete(field: FormField) {
-    if (!window.confirm(`Delete the "${field.label}" field?`)) return;
     await apiClient.delete(`/events/${params.id}/form/fields/${field.id}`);
     load();
   }
@@ -151,7 +152,7 @@ export default function FormBuilderPage() {
                     <Pencil className="h-4 w-4" />
                   </Button>
                   {!field.isDefaultField && (
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(field)}>
+                    <Button variant="ghost" size="sm" onClick={() => setPendingDelete(field)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
@@ -177,6 +178,14 @@ export default function FormBuilderPage() {
         field={editingField}
         otherFields={fields.filter((f) => f.id !== editingField?.id)}
         onSave={handleSave}
+      />
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        title={`Delete the "${pendingDelete?.label}" field?`}
+        confirmLabel="Delete"
+        onConfirm={() => pendingDelete && handleDelete(pendingDelete)}
       />
     </div>
   );

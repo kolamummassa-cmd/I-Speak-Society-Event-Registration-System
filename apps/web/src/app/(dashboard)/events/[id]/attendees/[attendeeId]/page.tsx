@@ -7,6 +7,7 @@ import type { AttendeeDetail } from "@isociety/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -59,6 +60,8 @@ export default function AttendeeDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isTogglingCheckIn, setIsTogglingCheckIn] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
     apiClient
@@ -111,12 +114,28 @@ export default function AttendeeDetailPage() {
   }
 
   async function handleDelete() {
-    if (!attendee) return;
-    if (!window.confirm(`Remove "${attendee.fullName}" from this event? This cannot be undone.`)) {
-      return;
-    }
     await apiClient.delete(`/events/${params.id}/attendees/${params.attendeeId}`);
     router.push(`/events/${params.id}/attendees`);
+  }
+
+  async function handleToggleCheckIn() {
+    if (!attendee) return;
+    setIsTogglingCheckIn(true);
+    setError(null);
+    try {
+      const res = attendee.checkedIn
+        ? await apiClient.delete<{ data: { attendee: AttendeeDetail } }>(
+            `/events/${params.id}/attendees/${params.attendeeId}/checkin`
+          )
+        : await apiClient.post<{ data: { attendee: AttendeeDetail } }>(
+            `/events/${params.id}/attendees/${params.attendeeId}/checkin`
+          );
+      setAttendee(res.data.attendee);
+    } catch (err) {
+      setError(formatApiError(err));
+    } finally {
+      setIsTogglingCheckIn(false);
+    }
   }
 
   if (error && !attendee) return <p className="text-sm text-destructive">{error}</p>;
@@ -136,6 +155,15 @@ export default function AttendeeDetailPage() {
           <Badge variant={attendee.checkedIn ? "default" : "success"}>
             {attendee.checkedIn ? "Checked in" : "Not checked in"}
           </Badge>
+          {attendee.checkedIn ? (
+            <Button variant="outline" disabled={isTogglingCheckIn} onClick={handleToggleCheckIn}>
+              {isTogglingCheckIn ? "Undoing..." : "Undo check-in"}
+            </Button>
+          ) : (
+            <Button variant="accent" disabled={isTogglingCheckIn} onClick={handleToggleCheckIn}>
+              {isTogglingCheckIn ? "Checking in..." : "Check in"}
+            </Button>
+          )}
           <Button asChild variant="outline">
             <Link href={`/events/${params.id}/attendees`}>Back to attendees</Link>
           </Button>
@@ -260,7 +288,7 @@ export default function AttendeeDetailPage() {
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={handleDelete}>
+        <Button variant="ghost" onClick={() => setConfirmDeleteOpen(true)}>
           Delete attendee
         </Button>
         <div className="flex items-center gap-3">
@@ -270,6 +298,15 @@ export default function AttendeeDetailPage() {
           </Button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title={`Remove "${attendee.fullName}" from this event?`}
+        description="This cannot be undone."
+        confirmLabel="Remove"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

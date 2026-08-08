@@ -8,6 +8,7 @@ import type { AttendeeSummary, Paginated } from "@isociety/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { apiClient, formatApiError } from "@/lib/api-client";
@@ -28,6 +29,7 @@ export default function AttendeesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState<"xlsx" | "pdf" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
   async function load(pageToLoad: number, searchValue: string, checkedInValue: CheckInFilter) {
     setIsLoading(true);
@@ -55,8 +57,7 @@ export default function AttendeesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
-  async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Remove "${name}" from this event? This cannot be undone.`)) return;
+  async function handleDelete(id: string) {
     await apiClient.delete(`/events/${params.id}/attendees/${id}`);
     load(page, search, checkedIn);
   }
@@ -174,7 +175,11 @@ export default function AttendeesPage() {
                     <Button asChild variant="outline" size="sm" className="flex-1">
                       <Link href={`/events/${params.id}/attendees/${a.id}`}>View</Link>
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id, a.fullName)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPendingDelete({ id: a.id, name: a.fullName })}
+                    >
                       Delete
                     </Button>
                   </div>
@@ -224,7 +229,11 @@ export default function AttendeesPage() {
                         <Button asChild variant="outline" size="sm">
                           <Link href={`/events/${params.id}/attendees/${a.id}`}>View</Link>
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id, a.fullName)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setPendingDelete({ id: a.id, name: a.fullName })}
+                        >
                           Delete
                         </Button>
                       </div>
@@ -264,6 +273,15 @@ export default function AttendeesPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        title={`Remove "${pendingDelete?.name}" from this event?`}
+        description="This cannot be undone."
+        confirmLabel="Remove"
+        onConfirm={() => pendingDelete && handleDelete(pendingDelete.id)}
+      />
     </div>
   );
 }

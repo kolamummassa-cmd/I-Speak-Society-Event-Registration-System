@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Check, Copy, Download, RefreshCw } from "lucide-react";
+import { Check, Copy, Download, ImageIcon, RefreshCw } from "lucide-react";
 import type { EventSummary } from "@isociety/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { QrPosterDialog } from "@/components/events/qr-poster-dialog";
 import { apiClient, formatApiError } from "@/lib/api-client";
 import { formatDate, formatTime } from "@/lib/format";
 
@@ -16,6 +17,7 @@ export default function EventDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [posterOpen, setPosterOpen] = useState(false);
 
   function load() {
     apiClient
@@ -138,6 +140,10 @@ export default function EventDetailPage() {
                     <RefreshCw className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
                     Regenerate
                   </Button>
+                  <Button variant="accent" size="sm" onClick={() => setPosterOpen(true)}>
+                    <ImageIcon className="h-4 w-4" />
+                    Printable poster
+                  </Button>
                 </div>
               </div>
             </div>
@@ -157,6 +163,8 @@ export default function EventDetailPage() {
           {error && <p className="text-sm text-destructive">{error}</p>}
         </CardContent>
       </Card>
+
+      <QrPosterDialog event={event} open={posterOpen} onOpenChange={setPosterOpen} />
     </div>
   );
 }

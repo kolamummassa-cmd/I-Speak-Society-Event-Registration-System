@@ -7,6 +7,7 @@ import type { EventStatus, EventSummary, Paginated } from "@isociety/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { apiClient } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
@@ -23,6 +24,7 @@ export default function EventsPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
   async function loadEvents(query: string) {
     setIsLoading(true);
@@ -45,10 +47,7 @@ export default function EventsPage() {
     loadEvents("");
   }, []);
 
-  async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Delete "${name}"? This also removes its registration form and attendees.`)) {
-      return;
-    }
+  async function handleDelete(id: string) {
     await apiClient.delete(`/events/${id}`);
     setEvents((prev) => prev.filter((e) => e.id !== id));
   }
@@ -108,7 +107,11 @@ export default function EventsPage() {
                     <Button asChild variant="outline" size="sm" className="flex-1">
                       <Link href={`/events/${event.id}/edit`}>Edit</Link>
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(event.id, event.name)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPendingDelete({ id: event.id, name: event.name })}
+                    >
                       Delete
                     </Button>
                   </div>
@@ -153,7 +156,11 @@ export default function EventsPage() {
                         <Button asChild variant="outline" size="sm">
                           <Link href={`/events/${event.id}/edit`}>Edit</Link>
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(event.id, event.name)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setPendingDelete({ id: event.id, name: event.name })}
+                        >
                           Delete
                         </Button>
                       </div>
@@ -165,6 +172,15 @@ export default function EventsPage() {
           </>
         )}
       </Card>
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        title={`Delete "${pendingDelete?.name}"?`}
+        description="This also removes its registration form and attendees. This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => pendingDelete && handleDelete(pendingDelete.id)}
+      />
     </div>
   );
 }
