@@ -43,9 +43,13 @@ export async function generateAttendeeReport(
   const event = await eventRepository.findById(eventId);
   if (!event) throw new AppError(404, "Event not found");
 
+  // Only fields the organizer has actually made visible on the registration
+  // form appear as columns here - same rule the PDF export already follows.
+  // Default fields (Full Name, Email, ...) are read from their real
+  // Attendee column; custom fields are read from AttendeeResponse.
   const form = await formRepository.findByEventId(eventId);
-  const customFields = (form?.fields ?? [])
-    .filter((f) => !f.isDefaultField)
+  const visibleFields = (form?.fields ?? [])
+    .filter((f) => f.isVisible)
     .sort((a, b) => a.displayOrder - b.displayOrder);
 
   const attendees = await attendeeRepository.findAllForExport(eventId, filters);
@@ -55,28 +59,37 @@ export async function generateAttendeeReport(
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet("Attendees", {
-    views: [{ state: "frozen", ySplit: 1 }],
+    views: [{ state: "frozen", ySplit: 4 }],
   });
 
-  const baseColumns = [
-    { header: "Registration Number", key: "registrationNumber", width: 22 },
-    { header: "Full Name", key: "fullName", width: 28 },
-    { header: "Phone", key: "phone", width: 18 },
-    { header: "Email", key: "email", width: 28 },
-    { header: "Organization", key: "organization", width: 24 },
-    { header: "Position", key: "position", width: 20 },
-    { header: "Gender", key: "gender", width: 12 },
-    { header: "Country", key: "country", width: 16 },
-    { header: "City", key: "city", width: 16 },
+  const leadingColumns = [{ header: "Registration Number", key: "registrationNumber", width: 22 }];
+  const enteredColumns = visibleFields.map((f) => ({ header: f.label, key: f.id, width: 22 }));
+  const trailingColumns = [
     { header: "Checked In", key: "checkedIn", width: 12 },
     { header: "Check-in Time", key: "checkInTime", width: 20 },
     { header: "Check-in Method", key: "checkInMethod", width: 16 },
     { header: "Registered At", key: "registeredAt", width: 20 },
   ];
-  const customColumns = customFields.map((f) => ({ header: f.label, key: f.id, width: 22 }));
-  sheet.columns = [...baseColumns, ...customColumns];
+  const columns = [...leadingColumns, ...enteredColumns, ...trailingColumns];
+  // Set widths without writing headers yet - the title rows above the
+  // header row are inserted first, then the header row is written manually.
+  sheet.columns = columns.map((c) => ({ key: c.key, width: c.width }));
 
-  const headerRow = sheet.getRow(1);
+  const lastColLetter = sheet.getColumn(columns.length).letter;
+
+  const titleRow = sheet.addRow([event.name]);
+  sheet.mergeCells(`A${titleRow.number}:${lastColLetter}${titleRow.number}`);
+  titleRow.font = { bold: true, size: 14 };
+  titleRow.height = 22;
+
+  const dateLabel = `${event.eventDate.toISOString().slice(0, 10)}${event.venue ? ` · ${event.venue}` : ""}`;
+  const subtitleRow = sheet.addRow([dateLabel]);
+  sheet.mergeCells(`A${subtitleRow.number}:${lastColLetter}${subtitleRow.number}`);
+  subtitleRow.font = { color: { argb: "FF64748B" } };
+
+  sheet.addRow([]);
+
+  const headerRow = sheet.addRow(columns.map((c) => c.header));
   headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
   headerRow.height = 20;
   headerRow.eachCell((cell) => {
@@ -90,21 +103,19 @@ export async function generateAttendeeReport(
     );
     const row: Record<string, string | number | Date | null> = {
       registrationNumber: attendee.registrationNumber,
-      fullName: attendee.fullName,
-      phone: attendee.phone,
-      email: attendee.email,
-      organization: attendee.organization,
-      position: attendee.position,
-      gender: attendee.gender,
-      country: attendee.country,
-      city: attendee.city,
       checkedIn: attendee.checkedIn ? "Yes" : "No",
       checkInTime: attendee.checkInTime,
       checkInMethod: attendee.checkInMethod,
       registeredAt: attendee.registeredAt,
     };
-    for (const field of customFields) {
-      row[field.id] = responseByField.get(field.id) ?? "";
+    for (const field of visibleFields) {
+      if (field.isDefaultField) {
+        const column = DEFAULT_FIELD_COLUMNS[field.fieldKey];
+        const raw = column ? (attendee as unknown as Record<string, unknown>)[column] : undefined;
+        row[field.id] = typeof raw === "string" ? raw : "";
+      } else {
+        row[field.id] = responseByField.get(field.id) ?? "";
+      }
     }
     sheet.addRow(row);
   }

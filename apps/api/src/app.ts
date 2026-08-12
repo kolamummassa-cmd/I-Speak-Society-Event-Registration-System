@@ -27,6 +27,12 @@ export function createApp() {
     cors({
       origin: env.CORS_ORIGIN,
       credentials: true,
+      // Content-Disposition isn't on the browser's default safelist of
+      // response headers JS is allowed to read cross-origin - without this,
+      // apiClient.download()'s filename parsing always comes back null and
+      // silently falls back to a generic name (e.g. "attendees.xlsx"
+      // instead of the actual event-name-and-date filename the server sends).
+      exposedHeaders: ["Content-Disposition"],
     })
   );
   app.use(express.json({ limit: "1mb" }));
