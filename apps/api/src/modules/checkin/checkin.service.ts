@@ -2,6 +2,8 @@ import { AppError } from "../../middleware/errorHandler";
 import { recordAuditLog } from "../../utils/audit";
 import * as attendeeRepository from "../attendees/attendee.repository";
 import { toSummary } from "../attendees/attendee.service";
+import * as eventRepository from "../events/event.repository";
+import { sendCheckInThankYouEmail } from "../email/email.service";
 import * as checkinRepository from "./checkin.repository";
 
 // Attendee QR codes encode `<web app origin>/checkin/<attendeeId>` (see
@@ -40,6 +42,18 @@ async function performCheckIn(
   });
 
   const updated = await attendeeRepository.findById(eventId, attendeeId);
+
+  // Best-effort - sendCheckInThankYouEmail never throws, so a slow/failed
+  // email provider can't turn a successful check-in into an error response.
+  const event = await eventRepository.findById(eventId);
+  if (event) {
+    void sendCheckInThankYouEmail({
+      to: attendee.email,
+      attendeeName: attendee.fullName,
+      eventName: event.name,
+    });
+  }
+
   return toSummary(updated!);
 }
 

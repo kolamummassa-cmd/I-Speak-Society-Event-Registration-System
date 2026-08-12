@@ -60,6 +60,12 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      # Optional: registration/check-in emails are skipped (not an error)
+      # until this is set to a real key from https://resend.com.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
 
   - type: web
     name: isociety-web

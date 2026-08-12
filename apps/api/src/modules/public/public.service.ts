@@ -6,6 +6,7 @@ import { AppError } from "../../middleware/errorHandler";
 import { recordAuditLog } from "../../utils/audit";
 import { generateRegistrationNumber } from "../../utils/registrationNumber";
 import { DEFAULT_FIELD_COLUMNS } from "../../utils/defaultFieldColumns";
+import { sendRegistrationConfirmationEmail } from "../email/email.service";
 
 const formInclude = {
   fields: {
@@ -197,6 +198,23 @@ export async function registerAttendee(
     eventId,
   });
 
+  const qrCodeDataUrl = await generateQrDataUrl(attendee.id, baseUrl);
+
+  // Best-effort - sendRegistrationConfirmationEmail never throws, so a
+  // slow/failed email provider can't turn a successful registration into
+  // an error response.
+  void sendRegistrationConfirmationEmail({
+    to: attendee.email,
+    attendeeName: attendee.fullName,
+    eventName: publicEvent.name,
+    eventDate: event.eventDate,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    venue: publicEvent.venue,
+    registrationNumber: attendee.registrationNumber,
+    qrCodeDataUrl,
+  });
+
   return {
     attendee: {
       id: attendee.id,
@@ -204,7 +222,7 @@ export async function registerAttendee(
       fullName: attendee.fullName,
     },
     event: publicEvent,
-    qrCodeDataUrl: await generateQrDataUrl(attendee.id, baseUrl),
+    qrCodeDataUrl,
   };
 }
 
