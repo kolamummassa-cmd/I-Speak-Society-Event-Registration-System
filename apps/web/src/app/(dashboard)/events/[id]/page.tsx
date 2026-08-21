@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Check, Copy, Download, ImageIcon, RefreshCw } from "lucide-react";
+import { Check, Copy, Download, ImageIcon, RefreshCw, UserPlus } from "lucide-react";
 import type { EventSummary } from "@isociety/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrPosterDialog } from "@/components/events/qr-poster-dialog";
+import { ManualRegistrationDialog } from "@/components/events/manual-registration-dialog";
 import { apiClient, formatApiError } from "@/lib/api-client";
 import { formatDate, formatTime } from "@/lib/format";
 
@@ -18,6 +19,7 @@ export default function EventDetailPage() {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [posterOpen, setPosterOpen] = useState(false);
+  const [manualRegOpen, setManualRegOpen] = useState(false);
 
   function load() {
     apiClient
@@ -144,6 +146,10 @@ export default function EventDetailPage() {
                     <ImageIcon className="h-4 w-4" />
                     Printable poster
                   </Button>
+                  <Button variant="outline" size="sm" onClick={() => setManualRegOpen(true)}>
+                    <UserPlus className="h-4 w-4" />
+                    Manual registration
+                  </Button>
                 </div>
               </div>
             </div>
@@ -165,6 +171,7 @@ export default function EventDetailPage() {
       </Card>
 
       <QrPosterDialog event={event} open={posterOpen} onOpenChange={setPosterOpen} />
+      <ManualRegistrationDialog event={event} open={manualRegOpen} onOpenChange={setManualRegOpen} />
     </div>
   );
 }
