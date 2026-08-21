@@ -4,7 +4,14 @@
     "outDir": "dist",
     "rootDir": "src",
     "module": "CommonJS",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    // This app is never imported by another TypeScript project, so it
+    // doesn't need to emit .d.ts files - and turning declarations off avoids
+    // TS2742 errors where pnpm's strict linking can't portably "name" a
+    // transitive type (e.g. Express's Application, Prisma's generated
+    // client method return types).
+    "declaration": false,
+    "declarationMap": false
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

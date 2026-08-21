@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { MulterError } from "multer";
 
 export class AppError extends Error {
   constructor(
@@ -26,6 +27,12 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
       message: err.message,
       details: err.details,
     });
+  }
+
+  if (err instanceof MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE" ? "File is too large (max 5MB)" : "File upload failed";
+    return res.status(400).json({ success: false, message });
   }
 
   console.error("Unhandled error:", err);
