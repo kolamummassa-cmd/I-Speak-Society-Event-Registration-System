@@ -22,7 +22,6 @@ export interface EventFormValues {
   endTime: string;
   registrationDeadline: string;
   organizerName: string;
-  logo: ImageValue;
   banner: ImageValue;
   status: EventStatus;
 }
@@ -36,7 +35,6 @@ const emptyValues: EventFormValues = {
   endTime: "",
   registrationDeadline: "",
   organizerName: "",
-  logo: emptyImageValue,
   banner: emptyImageValue,
   status: "DRAFT",
 };
@@ -53,7 +51,6 @@ export function eventToFormValues(event: EventSummary): EventFormValues {
       ? formatDateTimeInput(event.registrationDeadline).slice(0, 10)
       : "",
     organizerName: event.organizerName ?? "",
-    logo: { url: event.logoUrl ?? "", publicId: event.logoPublicId ?? "", file: null },
     banner: { url: event.bannerUrl ?? "", publicId: event.bannerPublicId ?? "", file: null },
     status: event.status,
   };
@@ -66,11 +63,10 @@ export function eventToFormValues(event: EventSummary): EventFormValues {
 // ("" signals removal to the API, which allows "" for these two fields
 // specifically so it can tell "cleared" apart from "not included").
 export function toBasePayload(values: EventFormValues) {
-  const { logo, banner, registrationDeadline, ...rest } = values;
+  const { banner, registrationDeadline, ...rest } = values;
   return {
     ...rest,
     registrationDeadline: registrationDeadline || undefined,
-    ...(logo.file ? {} : { logoUrl: logo.url, logoPublicId: logo.publicId }),
     ...(banner.file ? {} : { bannerUrl: banner.url, bannerPublicId: banner.publicId }),
   };
 }
@@ -82,11 +78,6 @@ export function toBasePayload(values: EventFormValues) {
 export async function uploadPendingImages(values: EventFormValues) {
   const patch: Record<string, string> = {};
 
-  if (values.logo.file) {
-    const uploaded = await uploadEventImage(values.logo.file, "logos");
-    patch.logoUrl = uploaded.url;
-    patch.logoPublicId = uploaded.publicId;
-  }
   if (values.banner.file) {
     const uploaded = await uploadEventImage(values.banner.file, "banners");
     patch.bannerUrl = uploaded.url;
@@ -215,8 +206,7 @@ export function EventForm({ initialValues = emptyValues, submitLabel, onSubmit }
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <ImageUploadField label="Event logo" value={values.logo} onChange={(v) => set("logo", v)} />
+      <div className="flex flex-col gap-2">
         <ImageUploadField label="Event banner" value={values.banner} onChange={(v) => set("banner", v)} />
       </div>
 

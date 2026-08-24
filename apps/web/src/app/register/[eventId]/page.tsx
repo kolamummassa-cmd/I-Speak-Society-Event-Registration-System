@@ -67,10 +67,6 @@ export default function PublicRegistrationPage() {
       <div className="mx-auto max-w-xl px-4 py-8">
         <Card>
           <CardHeader className="items-center text-center">
-            {event.logoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element -- remote Cloudinary URL
-              <img src={event.logoUrl} alt={event.name} className="mb-2 h-16 w-16 rounded-full object-cover" />
-            )}
             <CardTitle className="text-2xl">{event.name}</CardTitle>
             <p className="text-sm text-muted-foreground">
               {formatDate(event.eventDate)} - {formatTime(event.startTime)} to {formatTime(event.endTime)}
