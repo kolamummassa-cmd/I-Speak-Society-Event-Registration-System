@@ -28,7 +28,7 @@ function LoginForm() {
   const sessionExpired = searchParams.get("expired") === "1";
   const { theme, toggleTheme } = useTheme();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,7 @@ function LoginForm() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await login(email, password);
+      await login(username, password);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
@@ -81,14 +81,14 @@ function LoginForm() {
           )}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
+                id="username"
+                type="text"
+                autoComplete="username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-2">

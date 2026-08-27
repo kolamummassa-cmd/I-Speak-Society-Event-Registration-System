@@ -9,17 +9,23 @@ import {
 } from "../../utils/jwt";
 import { verifyPassword } from "../../utils/password";
 
-function toAuthUser(user: { id: string; name: string; email: string; role: "ORGANIZER" }) {
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+function toAuthUser(user: {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: "ORGANIZER";
+}) {
+  return { id: user.id, name: user.name, username: user.username, email: user.email, role: user.role };
 }
 
 export async function login(input: LoginInput) {
-  const user = await prisma.user.findUnique({ where: { email: input.email } });
+  const user = await prisma.user.findUnique({ where: { username: input.username } });
 
   // Same error for "no such user" and "wrong password" - don't let an
-  // attacker use the login form to enumerate which emails have accounts.
+  // attacker use the login form to enumerate which usernames have accounts.
   if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
-    throw new AppError(401, "Invalid email or password");
+    throw new AppError(401, "Invalid username or password");
   }
 
   const accessToken = signAccessToken({ sub: user.id, role: user.role });

@@ -6,25 +6,26 @@ const prisma = new PrismaClient();
 
 async function main() {
   const name = process.env.SEED_ORGANIZER_NAME ?? "I Speak Society Admin";
+  const username = process.env.SEED_ORGANIZER_USERNAME;
   const email = process.env.SEED_ORGANIZER_EMAIL;
   const password = process.env.SEED_ORGANIZER_PASSWORD;
 
-  if (!email || !password) {
+  if (!username || !email || !password) {
     throw new Error(
-      "Set SEED_ORGANIZER_EMAIL and SEED_ORGANIZER_PASSWORD in packages/database/.env before seeding."
+      "Set SEED_ORGANIZER_USERNAME, SEED_ORGANIZER_EMAIL, and SEED_ORGANIZER_PASSWORD in packages/database/.env before seeding."
     );
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
 
   const user = await prisma.user.upsert({
-    where: { email },
+    where: { username },
     update: {}, // Never overwrite an existing user's password on re-seed.
-    create: { name, email, passwordHash, role: "ORGANIZER" },
+    create: { name, username, email, passwordHash, role: "ORGANIZER" },
   });
 
-  console.log(`Seeded organizer account: ${user.email} (id: ${user.id})`);
-  console.log("Log in with the email/password from your .env, then consider rotating it.");
+  console.log(`Seeded organizer account: ${user.username} (id: ${user.id})`);
+  console.log("Log in with the username/password from your .env, then consider rotating it.");
 }
 
 main()

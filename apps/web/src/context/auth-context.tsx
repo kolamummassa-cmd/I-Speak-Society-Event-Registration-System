@@ -8,7 +8,7 @@ import { apiClient, setAccessToken, setSessionExpiredHandler } from "@/lib/api-c
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -43,10 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => setSessionExpiredHandler(null);
   }, [router]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
     const res = await apiClient.post<{ data: { accessToken: string; user: AuthUser } }>(
       "/auth/login",
-      { email, password }
+      { username, password }
     );
     setAccessToken(res.data.accessToken);
     setUser(res.data.user);
