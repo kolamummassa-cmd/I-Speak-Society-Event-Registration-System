@@ -5,3 +5,11 @@ packages:
 allowBuilds:
   sharp: false
   unrs-resolver: false
+  # These packages have postinstall scripts we actually need:
+  # bcrypt compiles a native module, prisma/@prisma/client/@prisma/engines
+  # download the query engine binary and generate the client.
+  bcrypt: true
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true
