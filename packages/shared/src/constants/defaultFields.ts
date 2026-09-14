@@ -27,7 +27,7 @@ export const DEFAULT_FIELDS: DefaultFieldDefinition[] = [
     options: [
       { label: "Male", value: "Male" },
       { label: "Female", value: "Female" },
-      { label: "Prefer not to say", value: "Prefer not to say" },
+      // { label: "Prefer not to say", value: "Prefer not to say" },
     ],
   },
   { fieldKey: "country", label: "Country", fieldType: "TEXT", isRequired: false, displayOrder: 6 },
